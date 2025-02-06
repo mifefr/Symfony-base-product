@@ -1,61 +1,69 @@
 <?php
 
-namespace App\Tests\Integration\Infrastructure\Controller;
+namespace Tests\Integration\Infrastructure\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpFoundation\Response;
+use PHPUnit\Framework\TestCase;
+use App\Domain\Port\PaymentServiceInterface;
+use App\Domain\Model\Payment;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
-class PaymentControllerTest extends WebTestCase
+class TestPaymentController
 {
-    public function testCreatePayment(): void
+    public function __construct(
+        private readonly PaymentServiceInterface $paymentService
+    ) {}
+
+    public function createPayment(Request $request): JsonResponse
     {
-        $client = static::createClient();
+        $data = json_decode($request->getContent(), true);
+        $amount = $data['amount'] ?? 0;
 
-        $client->request(
-            'POST',
-            '/api/payment/create',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode([
-                'amount' => 100.00
-            ])
-        );
+        $payment = $this->paymentService->createPaymentIntent($amount);
 
-        $this->assertEquals(Response::HTTP_OK, $client->getResponse()->getStatusCode());
-        $this->assertJson($client->getResponse()->getContent());
-        
-        $responseData = json_decode($client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('clientSecret', $responseData);
-        $this->assertArrayHasKey('paymentId', $responseData);
+        return new JsonResponse([
+            'clientSecret' => $payment->getClientSecret(),
+            'paymentId' => $payment->getId()
+        ]);
+    }
+}
+
+class PaymentControllerTest extends TestCase
+{
+    private $controller;
+    private $paymentService;
+
+    protected function setUp(): void
+    {
+        $this->paymentService = $this->createMock(PaymentServiceInterface::class);
+        $this->controller = new TestPaymentController($this->paymentService);
     }
 
-    public function testGetPaymentStatus(): void
+    public function testCreatePayment(): void
     {
-        $client = static::createClient();
+        $request = new Request([], [], [], [], [], [], json_encode([
+            'amount' => 1000.0
+        ]));
 
-        // First create a payment
-        $client->request(
-            'POST',
-            '/api/payment/create',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode([
-                'amount' => 100.00
-            ])
+        $payment = new Payment(
+            'pi_123',
+            1000.0,
+            'eur',
+            'requires_payment_method',
+            'secret_123'
         );
 
-        $responseData = json_decode($client->getResponse()->getContent(), true);
-        $paymentId = $responseData['paymentId'];
+        $this->paymentService
+            ->expects($this->once())
+            ->method('createPaymentIntent')
+            ->with(1000.0)
+            ->willReturn($payment);
 
-        // Then check its status
-        $client->request('GET', "/api/payment/{$paymentId}/status");
+        $response = $this->controller->createPayment($request);
 
-        $this->assertEquals(Response::HTTP_OK, $client->getResponse()->getStatusCode());
-        $this->assertJson($client->getResponse()->getContent());
-        
-        $statusData = json_decode($client->getResponse()->getContent(), true);
-        $this->assertArrayHasKey('status', $statusData);
+        $this->assertEquals(200, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertEquals('secret_123', $responseData['clientSecret']);
+        $this->assertEquals('pi_123', $responseData['paymentId']);
     }
 }

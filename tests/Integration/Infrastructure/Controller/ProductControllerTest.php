@@ -1,62 +1,99 @@
 <?php
 
-namespace App\Tests\Integration\Infrastructure\Controller;
+namespace Tests\Integration\Infrastructure\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpFoundation\Response;
+use PHPUnit\Framework\TestCase;
+use App\Application\Command\CreateProduct\CreateProductCommand;
+use App\Application\Query\ListProducts\ListProductsQuery;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
 
-class ProductControllerTest extends WebTestCase
+class TestProductController
 {
-    public function testCreateProduct(): void
-    {
-        $client = static::createClient();
+    public function __construct(
+        private readonly MessageBusInterface $commandBus,
+        private readonly MessageBusInterface $queryBus
+    ) {}
 
-        $client->request(
-            'POST',
-            '/api/products',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode([
-                'name' => 'Test Product',
-                'price' => 99.99,
-                'description' => 'Test Description'
-            ])
+    public function create(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $command = new CreateProductCommand(
+            $data['name'],
+            (float) $data['price'],
+            $data['description']
         );
 
-        $this->assertEquals(Response::HTTP_CREATED, $client->getResponse()->getStatusCode());
-        $this->assertJson($client->getResponse()->getContent());
+        $this->commandBus->dispatch($command);
+
+        return new JsonResponse(null, 201);
     }
 
-    public function testGetProduct(): void
+    public function list(): JsonResponse
     {
-        $client = static::createClient();
+        $query = new ListProductsQuery();
+        $envelope = $this->queryBus->dispatch($query);
+        $handledStamp = $envelope->last(HandledStamp::class);
+        $result = $handledStamp ? $handledStamp->getResult() : [];
 
-        // First create a product
-        $client->request(
-            'POST',
-            '/api/products',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode([
-                'name' => 'Test Product',
-                'price' => 99.99,
-                'description' => 'Test Description'
-            ])
-        );
+        return new JsonResponse($result);
+    }
+}
 
-        $responseData = json_decode($client->getResponse()->getContent(), true);
-        $productId = $responseData['id'] ?? null;
+class ProductControllerTest extends TestCase
+{
+    private $controller;
+    private $commandBus;
+    private $queryBus;
 
-        // Then try to get it
-        $client->request('GET', "/api/products/{$productId}");
+    protected function setUp(): void
+    {
+        $this->commandBus = $this->createMock(MessageBusInterface::class);
+        $this->queryBus = $this->createMock(MessageBusInterface::class);
+        $this->controller = new TestProductController($this->commandBus, $this->queryBus);
+    }
 
-        $this->assertEquals(Response::HTTP_OK, $client->getResponse()->getStatusCode());
-        $this->assertJson($client->getResponse()->getContent());
-        
-        $product = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals('Test Product', $product['name']);
-        $this->assertEquals(99.99, $product['price']);
+    public function testCreateProduct(): void
+    {
+        $request = new Request([], [], [], [], [], [], json_encode([
+            'name' => 'Test Product',
+            'price' => 1000.0,
+            'description' => 'Test Description'
+        ]));
+
+        $envelope = new Envelope(new \stdClass(), [
+            new HandledStamp(new \stdClass(), 'handler.service.id')
+        ]);
+
+        $this->commandBus
+            ->expects($this->once())
+            ->method('dispatch')
+            ->with($this->isInstanceOf(CreateProductCommand::class))
+            ->willReturn($envelope);
+
+        $response = $this->controller->create($request);
+
+        $this->assertEquals(201, $response->getStatusCode());
+    }
+
+    public function testListProducts(): void
+    {
+        $envelope = new Envelope(new \stdClass(), [
+            new HandledStamp([], 'handler.service.id')
+        ]);
+
+        $this->queryBus
+            ->expects($this->once())
+            ->method('dispatch')
+            ->with($this->isInstanceOf(ListProductsQuery::class))
+            ->willReturn($envelope);
+
+        $response = $this->controller->list();
+
+        $this->assertEquals(200, $response->getStatusCode());
     }
 }

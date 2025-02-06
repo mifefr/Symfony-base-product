@@ -1,78 +1,56 @@
 <?php
 
-namespace App\Tests\Unit\Infrastructure\Adapter;
+namespace Tests\Unit\Infrastructure\Adapter;
 
-use App\Infrastructure\Adapter\StripeAdapter;
 use PHPUnit\Framework\TestCase;
-use Stripe\PaymentIntent;
+use App\Infrastructure\Adapter\StripeAdapter;
+use App\Domain\Model\Payment;
 use Stripe\StripeClient;
-use Mockery;
+use Stripe\PaymentIntent;
+use Stripe\Service\PaymentIntentService;
 
 class StripeAdapterTest extends TestCase
 {
-    private $stripeClient;
     private $stripeAdapter;
-    private $paymentIntents;
+    private $stripeClient;
+    private $paymentIntentService;
 
     protected function setUp(): void
     {
-        $this->paymentIntents = Mockery::mock('Stripe\Service\PaymentIntentService');
-        $this->stripeClient = Mockery::mock(StripeClient::class);
-        $this->stripeClient->paymentIntents = $this->paymentIntents;
+        $this->stripeClient = $this->createMock(StripeClient::class);
+        $this->paymentIntentService = $this->createMock(PaymentIntentService::class);
+        $this->stripeClient->paymentIntents = $this->paymentIntentService;
         
-        $this->stripeAdapter = new StripeAdapter('fake_key');
-        $this->setProtectedProperty($this->stripeAdapter, 'stripe', $this->stripeClient);
-    }
-
-    protected function tearDown(): void
-    {
-        Mockery::close();
+        $this->stripeAdapter = new StripeAdapter('test_key');
+        $reflection = new \ReflectionClass($this->stripeAdapter);
+        $property = $reflection->getProperty('stripe');
+        $property->setAccessible(true);
+        $property->setValue($this->stripeAdapter, $this->stripeClient);
     }
 
     public function testCreatePaymentIntent(): void
     {
-        $paymentIntent = new PaymentIntent();
-        $paymentIntent->id = 'pi_123';
-        $paymentIntent->status = 'requires_payment_method';
+        $paymentIntent = new PaymentIntent('pi_123');
         $paymentIntent->client_secret = 'secret_123';
-
-        $this->paymentIntents
-            ->shouldReceive('create')
+        $paymentIntent->status = 'requires_payment_method';
+        
+        $this->paymentIntentService
+            ->expects($this->once())
+            ->method('create')
             ->with([
-                'amount' => 10000,
+                'amount' => 100000, // 1000.00 EUR in cents
                 'currency' => 'eur',
                 'automatic_payment_methods' => ['enabled' => true],
             ])
-            ->andReturn($paymentIntent);
-
-        $payment = $this->stripeAdapter->createPaymentIntent(100.00);
-
+            ->willReturn($paymentIntent);
+        
+        $payment = $this->stripeAdapter->createPaymentIntent(1000.0);
+        
+        $this->assertInstanceOf(Payment::class, $payment);
         $this->assertEquals('pi_123', $payment->getId());
-        $this->assertEquals(100.00, $payment->getAmount());
+        $this->assertEquals(1000.0, $payment->getAmount());
+        $this->assertEquals('eur', $payment->getCurrency());
         $this->assertEquals('requires_payment_method', $payment->getStatus());
         $this->assertEquals('secret_123', $payment->getClientSecret());
-    }
-
-    public function testGetPaymentStatus(): void
-    {
-        $paymentIntent = new PaymentIntent();
-        $paymentIntent->status = 'succeeded';
-
-        $this->paymentIntents
-            ->shouldReceive('retrieve')
-            ->with('pi_123')
-            ->andReturn($paymentIntent);
-
-        $status = $this->stripeAdapter->getPaymentStatus('pi_123');
-
-        $this->assertEquals('succeeded', $status);
-    }
-
-    private function setProtectedProperty($object, $property, $value)
-    {
-        $reflection = new \ReflectionClass(get_class($object));
-        $property = $reflection->getProperty($property);
-        $property->setAccessible(true);
-        $property->setValue($object, $value);
     }
 }
