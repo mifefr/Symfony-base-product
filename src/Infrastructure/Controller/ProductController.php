@@ -2,15 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Primary\Controller;
+namespace App\Infrastructure\Controller;
 
 use App\Application\Command\CreateProduct\CreateProductCommand;
 use App\Application\Query\GetProduct\GetProductQuery;
+use App\Application\Query\ListProducts\ListProductsQuery;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Messenger\Handler\HandlerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends AbstractController
@@ -44,5 +47,28 @@ class ProductController extends AbstractController
         $product = $this->queryBus->dispatch($query)->getHandlerResult();
 
         return $this->json($product);
+    }
+
+    #[Route('/api/products', name: 'list_products', methods: ['GET'])]
+    public function list(): JsonResponse
+    {
+        $query = new ListProductsQuery();
+        $envelope = $this->queryBus->dispatch($query);
+        $products = $envelope->last(HandledStamp::class)?->getResult();
+
+        if (!is_array($products)) {
+            $products = [];
+        }
+
+        $productsArray = array_map(function ($product) {
+            return [
+                'id' => $product->getId(),
+                'name' => $product->getName(),
+                'price' => $product->getPrice(),
+                'description' => $product->getDescription(),
+            ];
+        }, $products);
+
+        return $this->json($productsArray);
     }
 }

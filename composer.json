@@ -7,18 +7,24 @@
     "prefer-stable": true,
     "require": {
         "php": ">=8.2",
+        "api-platform/api-pack": "^1.4",
         "doctrine/doctrine-bundle": "^2.11",
         "doctrine/orm": "^2.17",
         "stripe/stripe-php": "^16.5",
         "symfony/framework-bundle": "^6.4",
         "symfony/messenger": "^6.4",
         "symfony/runtime": "^6.4",
-        "symfony/validator": "^6.4"
+        "symfony/uid": "^7.2",
+        "symfony/validator": "^6.4",
+        "symfony/yaml": "^7.2",
+        "symfony/dotenv": "^6.4"
     },
     "require-dev": {
         "mockery/mockery": "^1.6",
+        "phpunit/php-code-coverage": "^9.2.32",
         "phpunit/phpunit": "^9.5",
         "symfony/maker-bundle": "^1.52",
+        "symfony/phpunit-bridge": "^7.2",
         "symfony/test-pack": "^1.1"
     },
     "config": {

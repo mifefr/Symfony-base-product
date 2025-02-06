@@ -1,6 +1,7 @@
+[![Coverage Status](https://coveralls.io/repos/github/mifefr/base-product/badge.svg?branch=master)](https://coveralls.io/github/mifefr/base-product?branch=master)
 # Base Product Template
 
-This project serves as a foundational template for building product-related applications using Symfony. It showcases a robust architecture leveraging Hexagonal Architecture, CQRS, and Stripe integration.
+This project serves as a template for building product-related applications using Symfony. It showcases an example of architecture leveraging Hexagonal Architecture, CQRS, and Stripe integration.
 
 ## Project Overview
 

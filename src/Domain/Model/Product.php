@@ -41,12 +41,4 @@ class Product
     {
         return $this->description;
     }
-
-    public function updatePrice(float $newPrice): void
-    {
-        if ($newPrice < 0) {
-            throw new \InvalidArgumentException('Price cannot be negative');
-        }
-        $this->price = $newPrice;
-    }
 }
