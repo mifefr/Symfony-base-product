@@ -27,7 +27,7 @@ This project serves as a template for building product-related applications usin
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/mifefr/base-product
+   git clone https://github.com/mifefr/Symfony-base-product
    cd base-product
    ```
 
