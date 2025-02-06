@@ -1,0 +1,11 @@
+{
+    "symfony/framework-bundle": {
+        "version": "6.4"
+    },
+    "api-platform/core": {
+        "version": "3.2"
+    },
+    "doctrine/orm": {
+        "version": "2.17"
+    }
+}

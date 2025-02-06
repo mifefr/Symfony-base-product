@@ -1,0 +1,15 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        driver: '%env(DATABASE_DRIVER)%'
+
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            Product:
+                type: xml
+                dir: '%kernel.project_dir%/config/doctrine'
+                prefix: 'App\Domain\Model'
+                is_bundle: false

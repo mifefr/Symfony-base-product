@@ -1,0 +1,15 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Domain/Model/'
+            - '../src/Kernel.php'
+
+    App\Infrastructure\Adapter\StripeAdapter:
+        arguments:
+            $apiKey: '%env(STRIPE_SECRET_KEY)%'
