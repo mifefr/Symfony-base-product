@@ -1,0 +1,14 @@
+api_products_post:
+    path: /api/products
+    controller: App\Infrastructure\Controller\ProductController::create
+    methods: [POST]
+
+api_products_get:
+    path: /api/products
+    controller: App\Infrastructure\Controller\ProductController::list
+    methods: [GET]
+
+api_product_get:
+    path: /api/products/{id}
+    controller: App\Infrastructure\Controller\ProductController::get
+    methods: [GET]

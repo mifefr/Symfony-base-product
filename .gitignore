@@ -1,0 +1,40 @@
+# Cache and logs (Symfony)
+/var/cache/*
+/var/log/*
+!var/cache/.gitkeep
+!var/log/.gitkeep
+
+# Parameters
+/.env
+/.env.local
+/.env.local.php
+/.env.*.local
+
+# Managed by Composer
+/vendor/
+/var/
+composer.phar
+
+# PHPUnit
+/phpunit.xml
+.phpunit.result.cache
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+# IDE
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store
+Thumbs.db

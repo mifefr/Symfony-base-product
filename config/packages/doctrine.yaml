@@ -1,7 +1,7 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
-        driver: '%env(DATABASE_DRIVER)%'
+        driver: pdo_mysql
 
     orm:
         auto_generate_proxy_classes: true
@@ -10,6 +10,6 @@ doctrine:
         mappings:
             Product:
                 type: xml
-                dir: '%kernel.project_dir%/config/doctrine'
+                dir: '%kernel.project_dir%/src/Infrastructure/Resource/doctrine'
                 prefix: 'App\Domain\Model'
                 is_bundle: false

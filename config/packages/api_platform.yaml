@@ -1,8 +1,0 @@
-api_platform:
-    title: 'Hexagonal Architecture Example'
-    description: 'An example of Symfony application using Hexagonal Architecture'
-    version: '1.0.0'
-    show_webby: false
-    defaults:
-        pagination_enabled: true
-        pagination_items_per_page: 30
