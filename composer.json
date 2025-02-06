@@ -21,6 +21,7 @@
     },
     "require-dev": {
         "mockery/mockery": "^1.6",
+        "php-coveralls/php-coveralls": "^2.7",
         "phpunit/php-code-coverage": "^9.2.32",
         "phpunit/phpunit": "^9.5",
         "symfony/maker-bundle": "^1.52",
