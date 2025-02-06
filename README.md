@@ -52,8 +52,9 @@ php bin/phpunit
 
 ## Usage
 
-- **Create Product**: Use the `/api/products` endpoint to create new products.
-- **Get Product**: Use the `/api/products/{id}` endpoint to retrieve product details.
+- **Create Product**: Use the `POST /api/products` endpoint to create new products.
+- **List Products**: Use the `GET /api/products` endpoint to retrieve all products.
+- **Get Product**: Use the `GET /api/products/{id}` endpoint to retrieve product details.
 - **Create Payment**: Use the `/api/payment/create` endpoint to initiate a payment.
 - **Check Payment Status**: Use the `/api/payment/{paymentId}/status` endpoint to check payment status.
 
