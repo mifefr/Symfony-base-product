@@ -30,10 +30,18 @@ class ProductController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
+        if (!isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
+        }
+
+        if (!isset($data['price'])) {
+            return new JsonResponse(['error' => 'Price is required'], Response::HTTP_BAD_REQUEST);
+        }
+
         $command = new CreateProductCommand(
             name: $data['name'],
             price: (float) $data['price'],
-            description: $data['description']
+            description: $data['description'] ?? ''
         );
 
         $this->commandBus->dispatch($command);
@@ -62,7 +70,7 @@ class ProductController extends AbstractController
     }
 
     #[Route('/api/products', name: 'list_products', methods: ['GET'])]
-    public function list(): JsonResponse
+    public function listProducts(): JsonResponse
     {
         $query = new ListProductsQuery();
         $envelope = $this->queryBus->dispatch($query);

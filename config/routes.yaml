@@ -12,3 +12,13 @@ api_product_get:
     path: /api/products/{id}
     controller: App\Infrastructure\Controller\ProductController::get
     methods: [GET]
+
+api_payment_create:
+    path: /api/payment/create
+    controller: App\Infrastructure\Controller\PaymentController::createPayment
+    methods: [POST]
+
+api_payment_status:
+    path: /api/payment/{paymentId}/status
+    controller: App\Infrastructure\Controller\PaymentController::getPaymentStatus
+    methods: [GET]

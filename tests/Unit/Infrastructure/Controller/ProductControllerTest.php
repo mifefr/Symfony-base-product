@@ -80,7 +80,7 @@ class ProductControllerTest extends AbstractControllerTest
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    public function testList(): void
+    public function testListProducts(): void
     {
         $products = [
             new Product('Product 1', 100.0),
@@ -97,7 +97,7 @@ class ProductControllerTest extends AbstractControllerTest
             ->with($this->isInstanceOf(ListProductsQuery::class))
             ->willReturn($envelope);
 
-        $response = $this->controller->list();
+        $response = $this->controller->listProducts();
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(200, $response->getStatusCode());

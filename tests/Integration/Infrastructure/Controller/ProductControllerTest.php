@@ -33,7 +33,7 @@ class TestProductController
         return new JsonResponse(null, 201);
     }
 
-    public function list(): JsonResponse
+    public function listProducts(): JsonResponse
     {
         $query = new ListProductsQuery();
         $envelope = $this->queryBus->dispatch($query);
@@ -92,7 +92,7 @@ class ProductControllerTest extends TestCase
             ->with($this->isInstanceOf(ListProductsQuery::class))
             ->willReturn($envelope);
 
-        $response = $this->controller->list();
+        $response = $this->controller->listProducts();
 
         $this->assertEquals(200, $response->getStatusCode());
     }
