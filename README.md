@@ -26,7 +26,7 @@ This project serves as a foundational template for building product-related appl
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/mifefr/base-product
    cd base-product
    ```
 
@@ -62,4 +62,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any changes.
+Contributions are welcome :) Please open an issue or submit a pull request for any changes.
