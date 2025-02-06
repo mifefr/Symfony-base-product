@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Uid\Uuid;
 
 class ProductController extends AbstractController
 {
@@ -43,10 +44,21 @@ class ProductController extends AbstractController
     #[Route('/api/products/{id}', name: 'get_product', methods: ['GET'])]
     public function get(string $id): JsonResponse
     {
-        $query = new GetProductQuery($id);
-        $product = $this->queryBus->dispatch($query)->getHandlerResult();
+        try {
+            $uuid = Uuid::fromString($id);
+            $query = new GetProductQuery($uuid);
+            $envelope = $this->queryBus->dispatch($query);
+            $handledStamp = $envelope->last(HandledStamp::class);
+            $product = $handledStamp ? $handledStamp->getResult() : null;
 
-        return $this->json($product);
+            if (!$product) {
+                return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            return $this->json($product);
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['error' => 'Invalid product ID format'], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     #[Route('/api/products', name: 'list_products', methods: ['GET'])]
