@@ -24,7 +24,7 @@ class DoctrineProductRepository implements ProductRepositoryInterface
 
     public function findById(Uuid $id): ?Product
     {
-        return $this->entityManager->getRepository(Product::class)->find($id);
+        return $this->entityManager->getRepository(Product::class)->findOneBy(['id' => $id]);
     }
 
     public function findAll(): array
