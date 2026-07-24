@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Application\Query\ListProducts;
 
 use App\Application\Query\ListProducts\ListProductsQueryHandler;
 use App\Application\Query\ListProducts\ListProductsQuery;
+use App\Application\Query\ProductView;
 use App\Domain\Model\Product;
 use App\Domain\ValueObject\Money;
 use App\Domain\ValueObject\ProductId;
@@ -36,7 +37,10 @@ class ListProductsQueryHandlerTest extends TestCase
         $query = new ListProductsQuery();
         $result = $this->handler->__invoke($query);
 
-        $this->assertSame($products, $result);
+        $this->assertCount(2, $result);
+        $this->assertContainsOnlyInstancesOf(ProductView::class, $result);
+        $this->assertSame(['Product 1', 'Product 2'], array_map(fn (ProductView $v) => $v->name, $result));
+        $this->assertSame([10.0, 20.0], array_map(fn (ProductView $v) => $v->price, $result));
     }
 
     public function testListProductsWhenEmpty(): void

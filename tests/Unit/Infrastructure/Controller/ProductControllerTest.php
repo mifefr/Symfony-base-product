@@ -7,6 +7,7 @@ use App\Application\Bus\QueryBusInterface;
 use App\Application\Command\CreateProduct\CreateProductCommand;
 use App\Application\Query\GetProduct\GetProductQuery;
 use App\Application\Query\ListProducts\ListProductsQuery;
+use App\Application\Query\ProductView;
 use App\Domain\Exception\ProductNotFoundException;
 use App\Domain\Model\Product;
 use App\Domain\ValueObject\Money;
@@ -75,7 +76,7 @@ class ProductControllerTest extends AbstractControllerTestCase
     public function testGet(): void
     {
         $productId = ProductId::generate();
-        $product = new Product($productId, 'Test Product', new Money(10000));
+        $view = ProductView::fromProduct(new Product($productId, 'Test Product', new Money(10000)));
 
         $this->queryBus
             ->expects($this->once())
@@ -83,7 +84,7 @@ class ProductControllerTest extends AbstractControllerTestCase
             ->with($this->callback(function (GetProductQuery $query) use ($productId) {
                 return $query->id->equals($productId);
             }))
-            ->willReturn($product);
+            ->willReturn($view);
 
         $response = $this->controller->get((string) $productId);
 
@@ -113,16 +114,16 @@ class ProductControllerTest extends AbstractControllerTestCase
 
     public function testListProducts(): void
     {
-        $products = [
-            new Product(ProductId::generate(), 'Product 1', new Money(10000)),
-            new Product(ProductId::generate(), 'Product 2', new Money(20000))
+        $views = [
+            ProductView::fromProduct(new Product(ProductId::generate(), 'Product 1', new Money(10000))),
+            ProductView::fromProduct(new Product(ProductId::generate(), 'Product 2', new Money(20000)))
         ];
 
         $this->queryBus
             ->expects($this->once())
             ->method('ask')
             ->with($this->isInstanceOf(ListProductsQuery::class))
-            ->willReturn($products);
+            ->willReturn($views);
 
         $response = $this->controller->listProducts();
 

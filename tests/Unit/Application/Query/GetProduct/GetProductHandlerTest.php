@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Application\Query\GetProduct;
 
 use App\Application\Query\GetProduct\GetProductHandler;
 use App\Application\Query\GetProduct\GetProductQuery;
+use App\Application\Query\ProductView;
 use App\Domain\Model\Product;
 use App\Domain\Repository\ProductRepositoryInterface;
 use PHPUnit\Framework\TestCase;
@@ -25,18 +26,21 @@ class GetProductHandlerTest extends TestCase
     public function testGetExistingProduct(): void
     {
         $productId = ProductId::generate();
-        $expectedProduct = new Product(ProductId::generate(), 'Test Product', new Money(1000));
+        $product = new Product($productId, 'Test Product', new Money(1000), 'A description');
 
         $this->productRepository
             ->expects($this->once())
             ->method('findById')
             ->with($productId)
-            ->willReturn($expectedProduct);
+            ->willReturn($product);
 
-        $query = new GetProductQuery($productId);
-        $result = $this->handler->__invoke($query);
+        $result = $this->handler->__invoke(new GetProductQuery($productId));
 
-        $this->assertSame($expectedProduct, $result);
+        $this->assertInstanceOf(ProductView::class, $result);
+        $this->assertSame((string) $productId, $result->id);
+        $this->assertSame('Test Product', $result->name);
+        $this->assertSame(10.0, $result->price);
+        $this->assertSame('A description', $result->description);
     }
 
     public function testGetNonExistingProductThrows(): void

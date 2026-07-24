@@ -9,7 +9,6 @@ use App\Application\Bus\QueryBusInterface;
 use App\Application\Command\CreateProduct\CreateProductCommand;
 use App\Application\Query\GetProduct\GetProductQuery;
 use App\Application\Query\ListProducts\ListProductsQuery;
-use App\Domain\Model\Product;
 use App\Domain\ValueObject\Money;
 use App\Domain\ValueObject\ProductId;
 use App\Infrastructure\Request\CreateProductRequest;
@@ -47,33 +46,16 @@ class ProductController extends AbstractController
     #[Route('/api/products/{id}', name: 'get_product', methods: ['GET'])]
     public function get(string $id): JsonResponse
     {
-        $product = $this->queryBus->ask(new GetProductQuery(ProductId::fromString($id)));
-
-        return $this->json($this->serializeProduct($product));
+        return $this->json(
+            $this->queryBus->ask(new GetProductQuery(ProductId::fromString($id)))
+        );
     }
 
     #[Route('/api/products', name: 'list_products', methods: ['GET'])]
     public function listProducts(): JsonResponse
     {
-        $products = $this->queryBus->ask(new ListProductsQuery());
+        $views = $this->queryBus->ask(new ListProductsQuery());
 
-        if (!is_array($products)) {
-            $products = [];
-        }
-
-        return $this->json(array_map(
-            fn (Product $product) => $this->serializeProduct($product),
-            $products
-        ));
-    }
-
-    private function serializeProduct(Product $product): array
-    {
-        return [
-            'id' => (string) $product->getId(),
-            'name' => $product->getName(),
-            'price' => $product->getPrice()->toDecimal(),
-            'description' => $product->getDescription(),
-        ];
+        return $this->json(is_array($views) ? $views : []);
     }
 }
