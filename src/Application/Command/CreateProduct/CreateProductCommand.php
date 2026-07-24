@@ -10,7 +10,7 @@ final class CreateProductCommand implements CommandInterface
 {
     public function __construct(
         public readonly string $name,
-        public readonly float $price,
+        public readonly int $priceInCents,
         public readonly string $description
     ) {
     }

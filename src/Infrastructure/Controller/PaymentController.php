@@ -26,13 +26,13 @@ class PaymentController extends AbstractController
             return new JsonResponse(['error' => 'Amount is required'], Response::HTTP_BAD_REQUEST);
         }
 
-        $amount = (float) $data['amount'];
-        if ($amount <= 0) {
+        $amountInCents = (int) round((float) $data['amount'] * 100);
+        if ($amountInCents <= 0) {
             return new JsonResponse(['error' => 'Amount must be greater than 0'], Response::HTTP_BAD_REQUEST);
         }
 
         try {
-            $payment = $this->paymentService->createPaymentIntent($amount);
+            $payment = $this->paymentService->createPaymentIntent($amountInCents);
 
             return $this->json([
                 'clientSecret' => $payment->getClientSecret(),

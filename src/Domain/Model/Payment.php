@@ -7,20 +7,20 @@ namespace App\Domain\Model;
 class Payment
 {
     private string $id;
-    private float $amount;
+    private int $amountInCents;
     private string $currency;
     private string $status;
     private ?string $clientSecret;
 
     public function __construct(
         string $id,
-        float $amount,
+        int $amountInCents,
         string $currency,
         string $status,
         ?string $clientSecret = null
     ) {
         $this->id = $id;
-        $this->amount = $amount;
+        $this->amountInCents = $amountInCents;
         $this->currency = $currency;
         $this->status = $status;
         $this->clientSecret = $clientSecret;
@@ -31,9 +31,9 @@ class Payment
         return $this->id;
     }
 
-    public function getAmount(): float
+    public function getAmountInCents(): int
     {
-        return $this->amount;
+        return $this->amountInCents;
     }
 
     public function getCurrency(): string

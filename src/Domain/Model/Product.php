@@ -8,17 +8,17 @@ class Product
 {
     private Uuid $id;
     private string $name;
-    private float $price;
+    private int $priceInCents;
     private ?string $description;
 
     public function __construct(
-        string $name, 
-        float $price, 
+        string $name,
+        int $priceInCents,
         ?string $description = null
     ) {
         $this->id = Uuid::v4();
         $this->name = $name;
-        $this->price = $price;
+        $this->priceInCents = $priceInCents;
         $this->description = $description;
     }
 
@@ -32,9 +32,9 @@ class Product
         return $this->name;
     }
 
-    public function getPrice(): float
+    public function getPriceInCents(): int
     {
-        return $this->price;
+        return $this->priceInCents;
     }
 
     public function getDescription(): ?string

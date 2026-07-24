@@ -18,15 +18,15 @@ class StripeAdapter implements PaymentServiceInterface
         $this->stripe = new StripeClient($apiKey);
     }
 
-    public function createPaymentIntent(float $amount, string $currency = 'eur'): Payment
+    public function createPaymentIntent(int $amountInCents, string $currency = 'eur'): Payment
     {
-        if ($amount <= 0) {
+        if ($amountInCents <= 0) {
             throw new \InvalidArgumentException('Amount must be greater than 0');
         }
 
         try {
             $paymentIntent = $this->stripe->paymentIntents->create([
-                'amount' => (int) round($amount * 100), // Stripe expects amounts in cents
+                'amount' => $amountInCents,
                 'currency' => $currency,
                 'automatic_payment_methods' => [
                     'enabled' => true,
@@ -35,7 +35,7 @@ class StripeAdapter implements PaymentServiceInterface
 
             return new Payment(
                 $paymentIntent->id,
-                $amount,
+                $amountInCents,
                 $currency,
                 $paymentIntent->status,
                 $paymentIntent->client_secret

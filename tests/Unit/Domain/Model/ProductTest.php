@@ -10,17 +10,17 @@ class ProductTest extends TestCase
 {
     public function testCreateProduct(): void
     {
-        $product = new Product('Test Product', 1000.0);
+        $product = new Product('Test Product', 100000);
         
         $this->assertInstanceOf(Uuid::class, $product->getId());
         $this->assertEquals('Test Product', $product->getName());
-        $this->assertEquals(1000.0, $product->getPrice());
+        $this->assertEquals(100000, $product->getPriceInCents());
         $this->assertNull($product->getDescription());
     }
 
     public function testCreateProductWithDescription(): void
     {
-        $product = new Product('Test Product', 1000.0, 'Test Description');
+        $product = new Product('Test Product', 100000, 'Test Description');
         
         $this->assertEquals('Test Description', $product->getDescription());
     }

@@ -40,7 +40,7 @@ class ProductController extends AbstractController
 
         $command = new CreateProductCommand(
             name: $data['name'],
-            price: (float) $data['price'],
+            priceInCents: (int) round((float) $data['price'] * 100),
             description: $data['description'] ?? ''
         );
 
@@ -63,7 +63,12 @@ class ProductController extends AbstractController
                 return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
             }
 
-            return $this->json($product);
+            return $this->json([
+                'id' => $product->getId(),
+                'name' => $product->getName(),
+                'price' => $product->getPriceInCents() / 100,
+                'description' => $product->getDescription(),
+            ]);
         } catch (\InvalidArgumentException $e) {
             return new JsonResponse(['error' => 'Invalid product ID format'], Response::HTTP_BAD_REQUEST);
         }
@@ -84,7 +89,7 @@ class ProductController extends AbstractController
             return [
                 'id' => $product->getId(),
                 'name' => $product->getName(),
-                'price' => $product->getPrice(),
+                'price' => $product->getPriceInCents() / 100,
                 'description' => $product->getDescription(),
             ];
         }, $products);

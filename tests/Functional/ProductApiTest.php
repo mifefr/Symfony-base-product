@@ -40,7 +40,7 @@ class ProductApiTest extends WebTestCase
         $products = $this->entityManager->getRepository(Product::class)->findAll();
         self::assertCount(1, $products);
         self::assertSame('Functional Test Product', $products[0]->getName());
-        self::assertSame(19.99, $products[0]->getPrice());
+        self::assertSame(1999, $products[0]->getPriceInCents());
     }
 
     public function testCreateProductWithoutNameReturns400(): void
@@ -54,8 +54,8 @@ class ProductApiTest extends WebTestCase
 
     public function testListProducts(): void
     {
-        $this->persistProduct(new Product('Product A', 10.0, 'First'));
-        $this->persistProduct(new Product('Product B', 20.5, 'Second'));
+        $this->persistProduct(new Product('Product A', 1000, 'First'));
+        $this->persistProduct(new Product('Product B', 2050, 'Second'));
 
         $this->client->request('GET', '/api/products');
 
@@ -67,7 +67,7 @@ class ProductApiTest extends WebTestCase
 
     public function testGetProduct(): void
     {
-        $product = new Product('Single Product', 42.5, 'Details');
+        $product = new Product('Single Product', 4250, 'Details');
         $this->persistProduct($product);
 
         $this->client->request('GET', '/api/products/' . $product->getId());

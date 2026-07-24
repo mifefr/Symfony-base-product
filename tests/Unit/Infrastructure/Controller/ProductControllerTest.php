@@ -45,7 +45,7 @@ class ProductControllerTest extends AbstractControllerTest
             ->method('dispatch')
             ->with($this->callback(function (CreateProductCommand $command) use ($requestData) {
                 return $command->name === $requestData['name']
-                    && $command->price === $requestData['price']
+                    && $command->priceInCents === 10000
                     && $command->description === $requestData['description'];
             }))
             ->willReturn(new Envelope(new \stdClass()));

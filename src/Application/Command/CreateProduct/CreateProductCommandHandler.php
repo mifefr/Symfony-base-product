@@ -20,7 +20,7 @@ class CreateProductCommandHandler
     {
         $product = new Product(
             $command->name,
-            $command->price,
+            $command->priceInCents,
             $command->description
         );
 

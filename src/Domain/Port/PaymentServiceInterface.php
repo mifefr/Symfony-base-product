@@ -8,7 +8,7 @@ use App\Domain\Model\Payment;
 
 interface PaymentServiceInterface
 {
-    public function createPaymentIntent(float $amount, string $currency = 'eur'): Payment;
+    public function createPaymentIntent(int $amountInCents, string $currency = 'eur'): Payment;
     public function confirmPayment(string $paymentIntentId): bool;
     public function getPaymentStatus(string $paymentIntentId): string;
 }

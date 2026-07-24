@@ -21,7 +21,7 @@ class CreateProductHandlerTest extends TestCase
 
     public function testHandle(): void
     {
-        $command = new CreateProductCommand('Test Product', 1000.0, 'Test Description');
+        $command = new CreateProductCommand('Test Product', 100000, 'Test Description');
 
         $this->productRepository
             ->expects($this->once())
@@ -29,7 +29,7 @@ class CreateProductHandlerTest extends TestCase
             ->with($this->callback(function ($product) {
                 return $product instanceof Product
                     && $product->getName() === 'Test Product'
-                    && $product->getPrice() === 1000.0
+                    && $product->getPriceInCents() === 100000
                     && $product->getDescription() === 'Test Description';
             }));
 

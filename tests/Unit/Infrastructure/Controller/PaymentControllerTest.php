@@ -31,7 +31,7 @@ class PaymentControllerTest extends AbstractControllerTest
 
         $payment = new Payment(
             'pi_123',
-            $amount,
+            100000,
             'eur',
             'secret_123',
             'requires_payment_method'
@@ -40,7 +40,7 @@ class PaymentControllerTest extends AbstractControllerTest
         $this->paymentService
             ->expects($this->once())
             ->method('createPaymentIntent')
-            ->with($amount)
+            ->with(100000)
             ->willReturn($payment);
 
         $response = $this->controller->createPayment($request);

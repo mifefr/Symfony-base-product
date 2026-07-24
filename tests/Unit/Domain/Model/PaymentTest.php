@@ -11,13 +11,13 @@ class PaymentTest extends TestCase
     {
         $payment = new Payment(
             'pay_123',
-            1000.0,
+            100000,
             'EUR',
             'pending'
         );
         
         $this->assertEquals('pay_123', $payment->getId());
-        $this->assertEquals(1000.0, $payment->getAmount());
+        $this->assertEquals(100000, $payment->getAmountInCents());
         $this->assertEquals('EUR', $payment->getCurrency());
         $this->assertEquals('pending', $payment->getStatus());
         $this->assertNull($payment->getClientSecret());
@@ -27,7 +27,7 @@ class PaymentTest extends TestCase
     {
         $payment = new Payment(
             'pay_123',
-            1000.0,
+            100000,
             'EUR',
             'pending',
             'secret_123'
