@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Application\Query\ListProducts;
+namespace App\Tests\Unit\Application\Query\ListProducts;
 
 use App\Application\Query\ListProducts\ListProductsQueryHandler;
 use App\Application\Query\ListProducts\ListProductsQuery;

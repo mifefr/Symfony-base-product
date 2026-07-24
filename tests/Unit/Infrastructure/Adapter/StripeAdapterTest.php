@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Infrastructure\Adapter;
+namespace App\Tests\Unit\Infrastructure\Adapter;
 
 use PHPUnit\Framework\TestCase;
 use App\Infrastructure\Adapter\StripeAdapter;

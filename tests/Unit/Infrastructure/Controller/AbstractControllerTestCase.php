@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Unit\Infrastructure\Controller;
+namespace App\Tests\Unit\Infrastructure\Controller;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 
-abstract class AbstractControllerTest extends TestCase
+abstract class AbstractControllerTestCase extends TestCase
 {
     protected Container $container;
 

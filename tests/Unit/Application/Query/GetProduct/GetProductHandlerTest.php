@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Application\Query\GetProduct;
+namespace App\Tests\Unit\Application\Query\GetProduct;
 
 use App\Application\Query\GetProduct\GetProductHandler;
 use App\Application\Query\GetProduct\GetProductQuery;

@@ -19,5 +19,4 @@ RUN composer install --no-interaction
 
 # Create var directory and set permissions
 RUN mkdir -p var/cache var/log \
-    && chown -R www-data:www-data var \
-    && chmod -R 777 var
+    && chown -R www-data:www-data var

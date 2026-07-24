@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\Unit\Infrastructure\Controller;
+namespace App\Tests\Unit\Infrastructure\Controller;
 
 use App\Application\Command\CreateProduct\CreateProductCommand;
 use App\Application\Query\GetProduct\GetProductQuery;
 use App\Application\Query\ListProducts\ListProductsQuery;
 use App\Domain\Model\Product;
 use App\Infrastructure\Controller\ProductController;
-use Tests\Unit\Infrastructure\Controller\AbstractControllerTest;
+use App\Tests\Unit\Infrastructure\Controller\AbstractControllerTestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Messenger\Envelope;
@@ -15,7 +15,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Uid\Uuid;
 
-class ProductControllerTest extends AbstractControllerTest
+class ProductControllerTest extends AbstractControllerTestCase
 {
     private ProductController $controller;
     private MessageBusInterface $commandBus;

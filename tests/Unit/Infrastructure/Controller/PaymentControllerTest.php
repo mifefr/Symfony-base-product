@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\Unit\Infrastructure\Controller;
+namespace App\Tests\Unit\Infrastructure\Controller;
 
 use App\Domain\Model\Payment;
 use App\Domain\Port\PaymentServiceInterface;
 use App\Infrastructure\Controller\PaymentController;
-use Tests\Unit\Infrastructure\Controller\AbstractControllerTest;
+use App\Tests\Unit\Infrastructure\Controller\AbstractControllerTestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class PaymentControllerTest extends AbstractControllerTest
+class PaymentControllerTest extends AbstractControllerTestCase
 {
     private PaymentController $controller;
     private PaymentServiceInterface $paymentService;
