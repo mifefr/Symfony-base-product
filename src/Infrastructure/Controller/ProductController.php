@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Controller;
 
+use App\Application\Bus\CommandBusInterface;
+use App\Application\Bus\QueryBusInterface;
 use App\Application\Command\CreateProduct\CreateProductCommand;
 use App\Application\Query\GetProduct\GetProductQuery;
 use App\Application\Query\ListProducts\ListProductsQuery;
@@ -14,16 +16,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Messenger\Exception\HandlerFailedException;
-use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends AbstractController
 {
     public function __construct(
-        private readonly MessageBusInterface $commandBus,
-        private readonly MessageBusInterface $queryBus
+        private readonly CommandBusInterface $commandBus,
+        private readonly QueryBusInterface $queryBus
     ) {
     }
 
@@ -48,13 +47,6 @@ class ProductController extends AbstractController
             );
 
             $this->commandBus->dispatch($command);
-        } catch (HandlerFailedException $e) {
-            $previous = $e->getPrevious();
-            if ($previous instanceof \InvalidArgumentException) {
-                return new JsonResponse(['error' => $previous->getMessage()], Response::HTTP_BAD_REQUEST);
-            }
-
-            throw $e;
         } catch (\InvalidArgumentException $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
@@ -69,27 +61,22 @@ class ProductController extends AbstractController
     public function get(string $id): JsonResponse
     {
         try {
-            $query = new GetProductQuery(ProductId::fromString($id));
-            $envelope = $this->queryBus->dispatch($query);
-            $handledStamp = $envelope->last(HandledStamp::class);
-            $product = $handledStamp ? $handledStamp->getResult() : null;
-
-            if (!$product) {
-                return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
-            }
-
-            return $this->json($this->serializeProduct($product));
+            $product = $this->queryBus->ask(new GetProductQuery(ProductId::fromString($id)));
         } catch (\InvalidArgumentException $e) {
             return new JsonResponse(['error' => 'Invalid product ID format'], Response::HTTP_BAD_REQUEST);
         }
+
+        if (!$product instanceof Product) {
+            return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($this->serializeProduct($product));
     }
 
     #[Route('/api/products', name: 'list_products', methods: ['GET'])]
     public function listProducts(): JsonResponse
     {
-        $query = new ListProductsQuery();
-        $envelope = $this->queryBus->dispatch($query);
-        $products = $envelope->last(HandledStamp::class)?->getResult();
+        $products = $this->queryBus->ask(new ListProductsQuery());
 
         if (!is_array($products)) {
             $products = [];
