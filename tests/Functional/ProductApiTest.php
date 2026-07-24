@@ -88,6 +88,8 @@ class ProductApiTest extends WebTestCase
         $data = json_decode($this->client->getResponse()->getContent(), true);
         self::assertCount(2, $data);
         self::assertSame(['Product A', 'Product B'], array_column($data, 'name'));
+        self::assertSame(['id', 'name', 'price', 'description'], array_keys($data[0]));
+        self::assertIsString($data[0]['id']);
     }
 
     public function testGetProduct(): void
@@ -99,8 +101,10 @@ class ProductApiTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         $data = json_decode($this->client->getResponse()->getContent(), true);
+        self::assertSame(['id', 'name', 'price', 'description'], array_keys($data));
         self::assertSame('Single Product', $data['name']);
         self::assertSame(42.5, $data['price']);
+        self::assertSame((string) $product->getId(), $data['id']);
     }
 
     public function testGetUnknownProductReturns404(): void

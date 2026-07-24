@@ -7,6 +7,7 @@ namespace App\Infrastructure\Controller;
 use App\Application\Command\CreateProduct\CreateProductCommand;
 use App\Application\Query\GetProduct\GetProductQuery;
 use App\Application\Query\ListProducts\ListProductsQuery;
+use App\Domain\Model\Product;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -75,12 +76,7 @@ class ProductController extends AbstractController
                 return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
             }
 
-            return $this->json([
-                'id' => $product->getId(),
-                'name' => $product->getName(),
-                'price' => $product->getPriceInCents() / 100,
-                'description' => $product->getDescription(),
-            ]);
+            return $this->json($this->serializeProduct($product));
         } catch (\InvalidArgumentException $e) {
             return new JsonResponse(['error' => 'Invalid product ID format'], Response::HTTP_BAD_REQUEST);
         }
@@ -97,15 +93,19 @@ class ProductController extends AbstractController
             $products = [];
         }
 
-        $productsArray = array_map(function ($product) {
-            return [
-                'id' => $product->getId(),
-                'name' => $product->getName(),
-                'price' => $product->getPriceInCents() / 100,
-                'description' => $product->getDescription(),
-            ];
-        }, $products);
+        return $this->json(array_map(
+            fn (Product $product) => $this->serializeProduct($product),
+            $products
+        ));
+    }
 
-        return $this->json($productsArray);
+    private function serializeProduct(Product $product): array
+    {
+        return [
+            'id' => (string) $product->getId(),
+            'name' => $product->getName(),
+            'price' => $product->getPriceInCents() / 100,
+            'description' => $product->getDescription(),
+        ];
     }
 }
