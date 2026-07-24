@@ -10,8 +10,8 @@ use App\Application\Query\ListProducts\ListProductsQuery;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Messenger\Handler\HandlerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Routing\Annotation\Route;
@@ -44,7 +44,16 @@ class ProductController extends AbstractController
             description: $data['description'] ?? ''
         );
 
-        $this->commandBus->dispatch($command);
+        try {
+            $this->commandBus->dispatch($command);
+        } catch (HandlerFailedException $e) {
+            $previous = $e->getPrevious();
+            if ($previous instanceof \InvalidArgumentException) {
+                return new JsonResponse(['error' => $previous->getMessage()], Response::HTTP_BAD_REQUEST);
+            }
+
+            throw $e;
+        }
 
         return new JsonResponse([
             'id' => (string) $command->id,

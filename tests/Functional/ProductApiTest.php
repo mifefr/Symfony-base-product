@@ -55,6 +55,28 @@ class ProductApiTest extends WebTestCase
         self::assertResponseStatusCodeSame(400);
     }
 
+    public function testCreateProductWithEmptyNameReturns400(): void
+    {
+        $this->client->request('POST', '/api/products', content: json_encode([
+            'name' => '',
+            'price' => 19.99,
+        ]));
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertSame(0, count($this->entityManager->getRepository(Product::class)->findAll()));
+    }
+
+    public function testCreateProductWithNegativePriceReturns400(): void
+    {
+        $this->client->request('POST', '/api/products', content: json_encode([
+            'name' => 'Bad Product',
+            'price' => -5.0,
+        ]));
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertSame(0, count($this->entityManager->getRepository(Product::class)->findAll()));
+    }
+
     public function testListProducts(): void
     {
         $this->persistProduct(new Product(Uuid::v4(), 'Product A', 1000, 'First'));

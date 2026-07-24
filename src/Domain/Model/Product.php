@@ -17,6 +17,13 @@ class Product
         int $priceInCents,
         ?string $description = null
     ) {
+        if (trim($name) === '') {
+            throw new \InvalidArgumentException('Product name cannot be empty');
+        }
+        if ($priceInCents < 0) {
+            throw new \InvalidArgumentException('Product price cannot be negative');
+        }
+
         $this->id = $id;
         $this->name = $name;
         $this->priceInCents = $priceInCents;
