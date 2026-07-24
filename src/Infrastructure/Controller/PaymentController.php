@@ -22,31 +22,21 @@ class PaymentController extends AbstractController
     #[Route('/api/payment/create', name: 'create_payment', methods: ['POST'])]
     public function createPayment(#[MapRequestPayload] CreatePaymentRequest $request): JsonResponse
     {
-        try {
-            $payment = $this->paymentService->createPaymentIntent(
-                Money::fromDecimal($request->amount)
-            );
+        $payment = $this->paymentService->createPaymentIntent(
+            Money::fromDecimal($request->amount)
+        );
 
-            return $this->json([
-                'clientSecret' => $payment->getClientSecret(),
-                'paymentId' => $payment->getId()
-            ]);
-        } catch (\InvalidArgumentException $e) {
-            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
-        } catch (\RuntimeException $e) {
-            return new JsonResponse(['error' => 'Payment provider error'], Response::HTTP_BAD_GATEWAY);
-        }
+        return $this->json([
+            'clientSecret' => $payment->getClientSecret(),
+            'paymentId' => $payment->getId()
+        ]);
     }
 
     #[Route('/api/payment/{paymentId}/status', name: 'payment_status', methods: ['GET'])]
     public function getPaymentStatus(string $paymentId): JsonResponse
     {
-        try {
-            $status = $this->paymentService->getPaymentStatus($paymentId);
-        } catch (\RuntimeException $e) {
-            return new JsonResponse(['error' => 'Payment provider error'], Response::HTTP_BAD_GATEWAY);
-        }
-
-        return $this->json(['status' => $status]);
+        return $this->json([
+            'status' => $this->paymentService->getPaymentStatus($paymentId),
+        ]);
     }
 }

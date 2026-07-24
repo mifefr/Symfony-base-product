@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Query\GetProduct;
 
+use App\Domain\Exception\ProductNotFoundException;
 use App\Domain\Model\Product;
 use App\Domain\Repository\ProductRepositoryInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -16,8 +17,14 @@ final class GetProductHandler
     ) {
     }
 
-    public function __invoke(GetProductQuery $query): ?Product
+    public function __invoke(GetProductQuery $query): Product
     {
-        return $this->productRepository->findById($query->id);
+        $product = $this->productRepository->findById($query->id);
+
+        if ($product === null) {
+            throw ProductNotFoundException::withId($query->id);
+        }
+
+        return $product;
     }
 }

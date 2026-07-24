@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Infrastructure\Controller;
 
+use App\Domain\Exception\PaymentProviderException;
 use App\Domain\Model\Payment;
 use App\Domain\ValueObject\Money;
 use App\Domain\Port\PaymentServiceInterface;
@@ -51,19 +52,17 @@ class PaymentControllerTest extends AbstractControllerTestCase
         $this->assertEquals('pi_123', $responseData['paymentId']);
     }
 
-    public function testCreatePaymentWithInvalidAmount(): void
+    public function testCreatePaymentWithNegativeAmountThrows(): void
     {
         $request = new CreatePaymentRequest();
         $request->amount = -100.0;
 
-        $response = $this->controller->createPayment($request);
+        $this->expectException(\InvalidArgumentException::class);
 
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertArrayHasKey('error', json_decode($response->getContent(), true));
+        $this->controller->createPayment($request);
     }
 
-    public function testCreatePaymentWithProviderFailureReturnsGenericError(): void
+    public function testCreatePaymentWithProviderFailureLetsExceptionPropagate(): void
     {
         $request = new CreatePaymentRequest();
         $request->amount = 100.0;
@@ -71,14 +70,11 @@ class PaymentControllerTest extends AbstractControllerTestCase
         $this->paymentService
             ->expects($this->once())
             ->method('createPaymentIntent')
-            ->willThrowException(new \RuntimeException('Failed to create payment intent: internal stripe details'));
+            ->willThrowException(new PaymentProviderException('Failed to create payment intent: internal stripe details'));
 
-        $response = $this->controller->createPayment($request);
+        $this->expectException(PaymentProviderException::class);
 
-        $this->assertEquals(502, $response->getStatusCode());
-        $responseData = json_decode($response->getContent(), true);
-        $this->assertEquals('Payment provider error', $responseData['error']);
-        $this->assertStringNotContainsString('stripe', $response->getContent());
+        $this->controller->createPayment($request);
     }
 
     public function testGetPaymentStatus(): void
@@ -95,16 +91,15 @@ class PaymentControllerTest extends AbstractControllerTestCase
         $this->assertEquals('succeeded', json_decode($response->getContent(), true)['status']);
     }
 
-    public function testGetPaymentStatusWithProviderFailureReturnsGenericError(): void
+    public function testGetPaymentStatusWithProviderFailureLetsExceptionPropagate(): void
     {
         $this->paymentService
             ->expects($this->once())
             ->method('getPaymentStatus')
-            ->willThrowException(new \RuntimeException('Failed to get payment status: internal stripe details'));
+            ->willThrowException(new PaymentProviderException('Failed to get payment status: internal stripe details'));
 
-        $response = $this->controller->getPaymentStatus('pi_123');
+        $this->expectException(PaymentProviderException::class);
 
-        $this->assertEquals(502, $response->getStatusCode());
-        $this->assertEquals('Payment provider error', json_decode($response->getContent(), true)['error']);
+        $this->controller->getPaymentStatus('pi_123');
     }
 }

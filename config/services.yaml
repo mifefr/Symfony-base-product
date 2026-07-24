@@ -7,6 +7,7 @@ services:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
+            - '../src/Domain/Exception/'
             - '../src/Domain/Model/'
             - '../src/Domain/ValueObject/'
             - '../src/Infrastructure/Doctrine/Type/'

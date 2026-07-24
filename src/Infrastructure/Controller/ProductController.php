@@ -30,17 +30,13 @@ class ProductController extends AbstractController
     #[Route('/api/products', name: 'create_product', methods: ['POST'])]
     public function create(#[MapRequestPayload] CreateProductRequest $request): JsonResponse
     {
-        try {
-            $command = new CreateProductCommand(
-                name: $request->name,
-                price: Money::fromDecimal($request->price),
-                description: $request->description ?? ''
-            );
+        $command = new CreateProductCommand(
+            name: $request->name,
+            price: Money::fromDecimal($request->price),
+            description: $request->description ?? ''
+        );
 
-            $this->commandBus->dispatch($command);
-        } catch (\InvalidArgumentException $e) {
-            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
-        }
+        $this->commandBus->dispatch($command);
 
         return new JsonResponse([
             'id' => (string) $command->id,
@@ -51,15 +47,7 @@ class ProductController extends AbstractController
     #[Route('/api/products/{id}', name: 'get_product', methods: ['GET'])]
     public function get(string $id): JsonResponse
     {
-        try {
-            $product = $this->queryBus->ask(new GetProductQuery(ProductId::fromString($id)));
-        } catch (\InvalidArgumentException $e) {
-            return new JsonResponse(['error' => 'Invalid product ID format'], Response::HTTP_BAD_REQUEST);
-        }
-
-        if (!$product instanceof Product) {
-            return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
-        }
+        $product = $this->queryBus->ask(new GetProductQuery(ProductId::fromString($id)));
 
         return $this->json($this->serializeProduct($product));
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Adapter;
 
+use App\Domain\Exception\PaymentProviderException;
 use App\Domain\Model\Payment;
 use App\Domain\Port\PaymentServiceInterface;
 use App\Domain\ValueObject\Money;
@@ -41,7 +42,7 @@ class StripeAdapter implements PaymentServiceInterface
                 $paymentIntent->client_secret
             );
         } catch (ApiErrorException $e) {
-            throw new \RuntimeException('Failed to create payment intent: ' . $e->getMessage(), 0, $e);
+            throw new PaymentProviderException('Failed to create payment intent: ' . $e->getMessage(), 0, $e);
         }
     }
 
@@ -51,7 +52,7 @@ class StripeAdapter implements PaymentServiceInterface
             $paymentIntent = $this->stripe->paymentIntents->retrieve($paymentIntentId);
             return $paymentIntent->status;
         } catch (ApiErrorException $e) {
-            throw new \RuntimeException('Failed to get payment status: ' . $e->getMessage(), 0, $e);
+            throw new PaymentProviderException('Failed to get payment status: ' . $e->getMessage(), 0, $e);
         }
     }
 }

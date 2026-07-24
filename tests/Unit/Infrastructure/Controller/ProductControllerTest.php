@@ -7,6 +7,7 @@ use App\Application\Bus\QueryBusInterface;
 use App\Application\Command\CreateProduct\CreateProductCommand;
 use App\Application\Query\GetProduct\GetProductQuery;
 use App\Application\Query\ListProducts\ListProductsQuery;
+use App\Domain\Exception\ProductNotFoundException;
 use App\Domain\Model\Product;
 use App\Domain\ValueObject\Money;
 use App\Domain\ValueObject\ProductId;
@@ -55,7 +56,7 @@ class ProductControllerTest extends AbstractControllerTestCase
         $this->assertTrue(Uuid::isValid($responseData['id']));
     }
 
-    public function testCreateWithDomainValidationErrorReturns400(): void
+    public function testCreateWithDomainValidationErrorLetsExceptionPropagate(): void
     {
         $request = new CreateProductRequest();
         $request->name = '   ';
@@ -66,10 +67,9 @@ class ProductControllerTest extends AbstractControllerTestCase
             ->method('dispatch')
             ->willThrowException(new \InvalidArgumentException('Product name cannot be empty'));
 
-        $response = $this->controller->create($request);
+        $this->expectException(\InvalidArgumentException::class);
 
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertEquals('Product name cannot be empty', json_decode($response->getContent(), true)['error']);
+        $this->controller->create($request);
     }
 
     public function testGet(): void
@@ -92,22 +92,23 @@ class ProductControllerTest extends AbstractControllerTestCase
         $this->assertEquals('Test Product', json_decode($response->getContent(), true)['name']);
     }
 
-    public function testGetNotFoundReturns404(): void
+    public function testGetNotFoundLetsDomainExceptionPropagate(): void
     {
-        $this->queryBus->method('ask')->willReturn(null);
+        $productId = ProductId::generate();
+        $this->queryBus->method('ask')->willThrowException(ProductNotFoundException::withId($productId));
 
-        $response = $this->controller->get((string) ProductId::generate());
+        $this->expectException(ProductNotFoundException::class);
 
-        $this->assertEquals(404, $response->getStatusCode());
+        $this->controller->get((string) $productId);
     }
 
-    public function testGetWithInvalidIdReturns400(): void
+    public function testGetWithInvalidIdThrows(): void
     {
         $this->queryBus->expects($this->never())->method('ask');
 
-        $response = $this->controller->get('not-a-uuid');
+        $this->expectException(\InvalidArgumentException::class);
 
-        $this->assertEquals(400, $response->getStatusCode());
+        $this->controller->get('not-a-uuid');
     }
 
     public function testListProducts(): void

@@ -7,6 +7,7 @@ use App\Application\Query\GetProduct\GetProductQuery;
 use App\Domain\Model\Product;
 use App\Domain\Repository\ProductRepositoryInterface;
 use PHPUnit\Framework\TestCase;
+use App\Domain\Exception\ProductNotFoundException;
 use App\Domain\ValueObject\Money;
 use App\Domain\ValueObject\ProductId;
 
@@ -38,7 +39,7 @@ class GetProductHandlerTest extends TestCase
         $this->assertSame($expectedProduct, $result);
     }
 
-    public function testGetNonExistingProduct(): void
+    public function testGetNonExistingProductThrows(): void
     {
         $productId = ProductId::generate();
 
@@ -48,9 +49,8 @@ class GetProductHandlerTest extends TestCase
             ->with($productId)
             ->willReturn(null);
 
-        $query = new GetProductQuery($productId);
-        $result = $this->handler->__invoke($query);
+        $this->expectException(ProductNotFoundException::class);
 
-        $this->assertNull($result);
+        $this->handler->__invoke(new GetProductQuery($productId));
     }
 }
