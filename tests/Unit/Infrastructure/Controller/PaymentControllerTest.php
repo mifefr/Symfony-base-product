@@ -76,4 +76,50 @@ class PaymentControllerTest extends AbstractControllerTest
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertArrayHasKey('error', json_decode($response->getContent(), true));
     }
+
+    public function testCreatePaymentWithProviderFailureReturnsGenericError(): void
+    {
+        $request = new Request([], [], [], [], [], [], json_encode([
+            'amount' => 100.0
+        ]));
+
+        $this->paymentService
+            ->expects($this->once())
+            ->method('createPaymentIntent')
+            ->willThrowException(new \RuntimeException('Failed to create payment intent: internal stripe details'));
+
+        $response = $this->controller->createPayment($request);
+
+        $this->assertEquals(502, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertEquals('Payment provider error', $responseData['error']);
+        $this->assertStringNotContainsString('stripe', $response->getContent());
+    }
+
+    public function testGetPaymentStatus(): void
+    {
+        $this->paymentService
+            ->expects($this->once())
+            ->method('getPaymentStatus')
+            ->with('pi_123')
+            ->willReturn('succeeded');
+
+        $response = $this->controller->getPaymentStatus('pi_123');
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('succeeded', json_decode($response->getContent(), true)['status']);
+    }
+
+    public function testGetPaymentStatusWithProviderFailureReturnsGenericError(): void
+    {
+        $this->paymentService
+            ->expects($this->once())
+            ->method('getPaymentStatus')
+            ->willThrowException(new \RuntimeException('Failed to get payment status: internal stripe details'));
+
+        $response = $this->controller->getPaymentStatus('pi_123');
+
+        $this->assertEquals(502, $response->getStatusCode());
+        $this->assertEquals('Payment provider error', json_decode($response->getContent(), true)['error']);
+    }
 }

@@ -41,14 +41,18 @@ class PaymentController extends AbstractController
         } catch (\InvalidArgumentException $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         } catch (\RuntimeException $e) {
-            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(['error' => 'Payment provider error'], Response::HTTP_BAD_GATEWAY);
         }
     }
 
     #[Route('/api/payment/{paymentId}/status', name: 'payment_status', methods: ['GET'])]
     public function getPaymentStatus(string $paymentId): JsonResponse
     {
-        $status = $this->paymentService->getPaymentStatus($paymentId);
+        try {
+            $status = $this->paymentService->getPaymentStatus($paymentId);
+        } catch (\RuntimeException $e) {
+            return new JsonResponse(['error' => 'Payment provider error'], Response::HTTP_BAD_GATEWAY);
+        }
 
         return $this->json(['status' => $status]);
     }

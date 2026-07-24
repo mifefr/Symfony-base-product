@@ -41,7 +41,7 @@ class StripeAdapter implements PaymentServiceInterface
                 $paymentIntent->client_secret
             );
         } catch (ApiErrorException $e) {
-            throw new \RuntimeException('Failed to create payment intent: ' . $e->getMessage());
+            throw new \RuntimeException('Failed to create payment intent: ' . $e->getMessage(), 0, $e);
         }
     }
 
@@ -51,7 +51,7 @@ class StripeAdapter implements PaymentServiceInterface
             $paymentIntent = $this->stripe->paymentIntents->retrieve($paymentIntentId);
             return $paymentIntent->status === 'succeeded';
         } catch (ApiErrorException $e) {
-            throw new \RuntimeException('Failed to confirm payment: ' . $e->getMessage());
+            throw new \RuntimeException('Failed to confirm payment: ' . $e->getMessage(), 0, $e);
         }
     }
 
@@ -61,7 +61,7 @@ class StripeAdapter implements PaymentServiceInterface
             $paymentIntent = $this->stripe->paymentIntents->retrieve($paymentIntentId);
             return $paymentIntent->status;
         } catch (ApiErrorException $e) {
-            throw new \RuntimeException('Failed to get payment status: ' . $e->getMessage());
+            throw new \RuntimeException('Failed to get payment status: ' . $e->getMessage(), 0, $e);
         }
     }
 }
