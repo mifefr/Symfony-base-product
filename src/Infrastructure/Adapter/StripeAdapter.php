@@ -45,16 +45,6 @@ class StripeAdapter implements PaymentServiceInterface
         }
     }
 
-    public function confirmPayment(string $paymentIntentId): bool
-    {
-        try {
-            $paymentIntent = $this->stripe->paymentIntents->retrieve($paymentIntentId);
-            return $paymentIntent->status === 'succeeded';
-        } catch (ApiErrorException $e) {
-            throw new \RuntimeException('Failed to confirm payment: ' . $e->getMessage(), 0, $e);
-        }
-    }
-
     public function getPaymentStatus(string $paymentIntentId): string
     {
         try {
