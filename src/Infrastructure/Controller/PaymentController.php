@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Controller;
 
 use App\Domain\Port\PaymentServiceInterface;
+use App\Domain\ValueObject\Money;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,18 +22,15 @@ class PaymentController extends AbstractController
     public function createPayment(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        
+
         if (!isset($data['amount'])) {
             return new JsonResponse(['error' => 'Amount is required'], Response::HTTP_BAD_REQUEST);
         }
 
-        $amountInCents = (int) round((float) $data['amount'] * 100);
-        if ($amountInCents <= 0) {
-            return new JsonResponse(['error' => 'Amount must be greater than 0'], Response::HTTP_BAD_REQUEST);
-        }
-
         try {
-            $payment = $this->paymentService->createPaymentIntent($amountInCents);
+            $payment = $this->paymentService->createPaymentIntent(
+                Money::fromDecimal((float) $data['amount'])
+            );
 
             return $this->json([
                 'clientSecret' => $payment->getClientSecret(),

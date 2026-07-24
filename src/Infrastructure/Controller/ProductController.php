@@ -8,6 +8,8 @@ use App\Application\Command\CreateProduct\CreateProductCommand;
 use App\Application\Query\GetProduct\GetProductQuery;
 use App\Application\Query\ListProducts\ListProductsQuery;
 use App\Domain\Model\Product;
+use App\Domain\ValueObject\Money;
+use App\Domain\ValueObject\ProductId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,7 +18,6 @@ use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Uid\Uuid;
 
 class ProductController extends AbstractController
 {
@@ -39,13 +40,13 @@ class ProductController extends AbstractController
             return new JsonResponse(['error' => 'Price is required'], Response::HTTP_BAD_REQUEST);
         }
 
-        $command = new CreateProductCommand(
-            name: $data['name'],
-            priceInCents: (int) round((float) $data['price'] * 100),
-            description: $data['description'] ?? ''
-        );
-
         try {
+            $command = new CreateProductCommand(
+                name: $data['name'],
+                price: Money::fromDecimal((float) $data['price']),
+                description: $data['description'] ?? ''
+            );
+
             $this->commandBus->dispatch($command);
         } catch (HandlerFailedException $e) {
             $previous = $e->getPrevious();
@@ -54,6 +55,8 @@ class ProductController extends AbstractController
             }
 
             throw $e;
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
 
         return new JsonResponse([
@@ -66,8 +69,7 @@ class ProductController extends AbstractController
     public function get(string $id): JsonResponse
     {
         try {
-            $uuid = Uuid::fromString($id);
-            $query = new GetProductQuery($uuid);
+            $query = new GetProductQuery(ProductId::fromString($id));
             $envelope = $this->queryBus->dispatch($query);
             $handledStamp = $envelope->last(HandledStamp::class);
             $product = $handledStamp ? $handledStamp->getResult() : null;
@@ -104,7 +106,7 @@ class ProductController extends AbstractController
         return [
             'id' => (string) $product->getId(),
             'name' => $product->getName(),
-            'price' => $product->getPriceInCents() / 100,
+            'price' => $product->getPrice()->toDecimal(),
             'description' => $product->getDescription(),
         ];
     }

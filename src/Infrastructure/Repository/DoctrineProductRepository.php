@@ -5,7 +5,7 @@ namespace App\Infrastructure\Repository;
 use App\Domain\Model\Product;
 use App\Domain\Repository\ProductRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Uid\Uuid;
+use App\Domain\ValueObject\ProductId;
 
 class DoctrineProductRepository implements ProductRepositoryInterface
 {
@@ -22,7 +22,7 @@ class DoctrineProductRepository implements ProductRepositoryInterface
         $this->entityManager->flush();
     }
 
-    public function findById(Uuid $id): ?Product
+    public function findById(ProductId $id): ?Product
     {
         return $this->entityManager->getRepository(Product::class)->findOneBy(['id' => $id]);
     }

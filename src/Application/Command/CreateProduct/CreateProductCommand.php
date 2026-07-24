@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace App\Application\Command\CreateProduct;
 
 use App\Application\Command\CommandInterface;
-use Symfony\Component\Uid\Uuid;
+use App\Domain\ValueObject\Money;
+use App\Domain\ValueObject\ProductId;
 
 final class CreateProductCommand implements CommandInterface
 {
-    public readonly Uuid $id;
+    public readonly ProductId $id;
 
     public function __construct(
         public readonly string $name,
-        public readonly int $priceInCents,
+        public readonly Money $price,
         public readonly string $description
     ) {
-        $this->id = Uuid::v4();
+        $this->id = ProductId::generate();
     }
 }

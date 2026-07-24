@@ -8,6 +8,8 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Domain/Model/'
+            - '../src/Domain/ValueObject/'
+            - '../src/Infrastructure/Doctrine/Type/'
             - '../src/Kernel.php'
 
     App\Infrastructure\Adapter\StripeAdapter:

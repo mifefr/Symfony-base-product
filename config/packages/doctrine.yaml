@@ -1,6 +1,8 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
+        types:
+            product_id: App\Infrastructure\Doctrine\Type\ProductIdType
 
     orm:
         auto_generate_proxy_classes: true
@@ -9,6 +11,11 @@ doctrine:
         mappings:
             Product:
                 type: xml
-                dir: '%kernel.project_dir%/src/Infrastructure/Resource/doctrine'
+                dir: '%kernel.project_dir%/src/Infrastructure/Resource/doctrine/model'
                 prefix: 'App\Domain\Model'
+                is_bundle: false
+            ValueObject:
+                type: xml
+                dir: '%kernel.project_dir%/src/Infrastructure/Resource/doctrine/valueobject'
+                prefix: 'App\Domain\ValueObject'
                 is_bundle: false

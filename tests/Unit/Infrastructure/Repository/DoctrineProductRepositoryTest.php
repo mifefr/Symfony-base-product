@@ -7,7 +7,8 @@ use App\Infrastructure\Repository\DoctrineProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Uid\Uuid;
+use App\Domain\ValueObject\Money;
+use App\Domain\ValueObject\ProductId;
 
 class DoctrineProductRepositoryTest extends TestCase
 {
@@ -24,7 +25,7 @@ class DoctrineProductRepositoryTest extends TestCase
 
     public function testSave(): void
     {
-        $product = new Product(Uuid::v4(), 'Test Product', 1000);
+        $product = new Product(ProductId::generate(), 'Test Product', new Money(1000));
 
         $this->entityManager
             ->expects($this->once())
@@ -40,8 +41,8 @@ class DoctrineProductRepositoryTest extends TestCase
 
     public function testFindById(): void
     {
-        $productId = Uuid::v4();
-        $expectedProduct = new Product(Uuid::v4(), 'Test Product', 1000);
+        $productId = ProductId::generate();
+        $expectedProduct = new Product(ProductId::generate(), 'Test Product', new Money(1000));
 
         $this->repository
             ->expects($this->once())
@@ -62,8 +63,8 @@ class DoctrineProductRepositoryTest extends TestCase
     public function testFindAll(): void
     {
         $expectedProducts = [
-            new Product(Uuid::v4(), 'Product 1', 1000),
-            new Product(Uuid::v4(), 'Product 2', 2000),
+            new Product(ProductId::generate(), 'Product 1', new Money(1000)),
+            new Product(ProductId::generate(), 'Product 2', new Money(2000)),
         ];
 
         $this->repository
@@ -83,7 +84,7 @@ class DoctrineProductRepositoryTest extends TestCase
 
     public function testDelete(): void
     {
-        $product = new Product(Uuid::v4(), 'Test Product', 1000);
+        $product = new Product(ProductId::generate(), 'Test Product', new Money(1000));
 
         $this->entityManager
             ->expects($this->once())

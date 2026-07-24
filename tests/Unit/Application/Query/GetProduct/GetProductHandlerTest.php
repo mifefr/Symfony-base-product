@@ -7,7 +7,8 @@ use App\Application\Query\GetProduct\GetProductQuery;
 use App\Domain\Model\Product;
 use App\Domain\Repository\ProductRepositoryInterface;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Uid\Uuid;
+use App\Domain\ValueObject\Money;
+use App\Domain\ValueObject\ProductId;
 
 class GetProductHandlerTest extends TestCase
 {
@@ -22,8 +23,8 @@ class GetProductHandlerTest extends TestCase
 
     public function testGetExistingProduct(): void
     {
-        $productId = Uuid::v4();
-        $expectedProduct = new Product(Uuid::v4(), 'Test Product', 1000);
+        $productId = ProductId::generate();
+        $expectedProduct = new Product(ProductId::generate(), 'Test Product', new Money(1000));
 
         $this->productRepository
             ->expects($this->once())
@@ -39,7 +40,7 @@ class GetProductHandlerTest extends TestCase
 
     public function testGetNonExistingProduct(): void
     {
-        $productId = Uuid::v4();
+        $productId = ProductId::generate();
 
         $this->productRepository
             ->expects($this->once())

@@ -9,6 +9,7 @@ use Stripe\Exception\InvalidRequestException;
 use Stripe\StripeClient;
 use Stripe\PaymentIntent;
 use Stripe\Service\PaymentIntentService;
+use App\Domain\ValueObject\Money;
 
 class StripeAdapterTest extends TestCase
 {
@@ -45,12 +46,12 @@ class StripeAdapterTest extends TestCase
             ])
             ->willReturn($paymentIntent);
         
-        $payment = $this->stripeAdapter->createPaymentIntent(100000);
+        $payment = $this->stripeAdapter->createPaymentIntent(new Money(100000));
         
         $this->assertInstanceOf(Payment::class, $payment);
         $this->assertEquals('pi_123', $payment->getId());
-        $this->assertEquals(100000, $payment->getAmountInCents());
-        $this->assertEquals('eur', $payment->getCurrency());
+        $this->assertEquals(100000, $payment->getAmount()->getAmountInCents());
+        $this->assertEquals('EUR', $payment->getAmount()->getCurrency());
         $this->assertEquals('requires_payment_method', $payment->getStatus());
         $this->assertEquals('secret_123', $payment->getClientSecret());
     }
@@ -59,14 +60,14 @@ class StripeAdapterTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Amount must be greater than 0');
-        $this->stripeAdapter->createPaymentIntent(0);
+        $this->stripeAdapter->createPaymentIntent(new Money(0));
     }
 
     public function testCreatePaymentIntentWithNegativeAmount(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Amount must be greater than 0');
-        $this->stripeAdapter->createPaymentIntent(-100);
+        $this->expectExceptionMessage('Amount cannot be negative');
+        $this->stripeAdapter->createPaymentIntent(new Money(-100));
     }
 
     public function testCreatePaymentIntentWithStripeError(): void
@@ -78,7 +79,7 @@ class StripeAdapterTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Stripe API Error');
-        $this->stripeAdapter->createPaymentIntent(100000);
+        $this->stripeAdapter->createPaymentIntent(new Money(100000));
     }
 
     public function testCreatePaymentIntentWithDecimalAmount(): void
@@ -97,9 +98,9 @@ class StripeAdapterTest extends TestCase
             ])
             ->willReturn($paymentIntent);
         
-        $payment = $this->stripeAdapter->createPaymentIntent(9999);
+        $payment = $this->stripeAdapter->createPaymentIntent(new Money(9999));
         
         $this->assertInstanceOf(Payment::class, $payment);
-        $this->assertEquals(9999, $payment->getAmountInCents());
+        $this->assertEquals(9999, $payment->getAmount()->getAmountInCents());
     }
 }

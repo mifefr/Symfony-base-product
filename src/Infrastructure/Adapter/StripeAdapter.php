@@ -6,6 +6,7 @@ namespace App\Infrastructure\Adapter;
 
 use App\Domain\Model\Payment;
 use App\Domain\Port\PaymentServiceInterface;
+use App\Domain\ValueObject\Money;
 use Stripe\StripeClient;
 use Stripe\Exception\ApiErrorException;
 
@@ -18,16 +19,16 @@ class StripeAdapter implements PaymentServiceInterface
         $this->stripe = new StripeClient($apiKey);
     }
 
-    public function createPaymentIntent(int $amountInCents, string $currency = 'eur'): Payment
+    public function createPaymentIntent(Money $amount): Payment
     {
-        if ($amountInCents <= 0) {
+        if ($amount->isZero()) {
             throw new \InvalidArgumentException('Amount must be greater than 0');
         }
 
         try {
             $paymentIntent = $this->stripe->paymentIntents->create([
-                'amount' => $amountInCents,
-                'currency' => $currency,
+                'amount' => $amount->getAmountInCents(),
+                'currency' => strtolower($amount->getCurrency()),
                 'automatic_payment_methods' => [
                     'enabled' => true,
                 ],
@@ -35,8 +36,7 @@ class StripeAdapter implements PaymentServiceInterface
 
             return new Payment(
                 $paymentIntent->id,
-                $amountInCents,
-                $currency,
+                $amount,
                 $paymentIntent->status,
                 $paymentIntent->client_secret
             );

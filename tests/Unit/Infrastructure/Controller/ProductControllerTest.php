@@ -6,6 +6,8 @@ use App\Application\Command\CreateProduct\CreateProductCommand;
 use App\Application\Query\GetProduct\GetProductQuery;
 use App\Application\Query\ListProducts\ListProductsQuery;
 use App\Domain\Model\Product;
+use App\Domain\ValueObject\Money;
+use App\Domain\ValueObject\ProductId;
 use App\Infrastructure\Controller\ProductController;
 use App\Tests\Unit\Infrastructure\Controller\AbstractControllerTestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -45,7 +47,7 @@ class ProductControllerTest extends AbstractControllerTestCase
             ->method('dispatch')
             ->with($this->callback(function (CreateProductCommand $command) use ($requestData) {
                 return $command->name === $requestData['name']
-                    && $command->priceInCents === 10000
+                    && $command->price->getAmountInCents() === 10000
                     && $command->description === $requestData['description'];
             }))
             ->willReturn(new Envelope(new \stdClass()));
@@ -61,8 +63,8 @@ class ProductControllerTest extends AbstractControllerTestCase
 
     public function testGet(): void
     {
-        $productId = Uuid::v4();
-        $product = new Product(Uuid::v4(), 'Test Product', 10000);
+        $productId = ProductId::generate();
+        $product = new Product(ProductId::generate(), 'Test Product', new Money(10000));
 
         $envelope = new Envelope(new \stdClass(), [
             new HandledStamp($product, 'handler')
@@ -85,8 +87,8 @@ class ProductControllerTest extends AbstractControllerTestCase
     public function testListProducts(): void
     {
         $products = [
-            new Product(Uuid::v4(), 'Product 1', 10000),
-            new Product(Uuid::v4(), 'Product 2', 20000)
+            new Product(ProductId::generate(), 'Product 1', new Money(10000)),
+            new Product(ProductId::generate(), 'Product 2', new Money(20000))
         ];
 
         $envelope = new Envelope(new \stdClass(), [

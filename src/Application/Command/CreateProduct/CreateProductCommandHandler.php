@@ -21,7 +21,7 @@ class CreateProductCommandHandler
         $product = new Product(
             $command->id,
             $command->name,
-            $command->priceInCents,
+            $command->price,
             $command->description
         );
 

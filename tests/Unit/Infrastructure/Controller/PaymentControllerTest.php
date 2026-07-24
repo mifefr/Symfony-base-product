@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Infrastructure\Controller;
 
 use App\Domain\Model\Payment;
+use App\Domain\ValueObject\Money;
 use App\Domain\Port\PaymentServiceInterface;
 use App\Infrastructure\Controller\PaymentController;
 use App\Tests\Unit\Infrastructure\Controller\AbstractControllerTestCase;
@@ -31,16 +32,15 @@ class PaymentControllerTest extends AbstractControllerTestCase
 
         $payment = new Payment(
             'pi_123',
-            100000,
-            'eur',
-            'secret_123',
-            'requires_payment_method'
+            new Money(100000),
+            'requires_payment_method',
+            'secret_123'
         );
 
         $this->paymentService
             ->expects($this->once())
             ->method('createPaymentIntent')
-            ->with(100000)
+            ->with(new Money(100000))
             ->willReturn($payment);
 
         $response = $this->controller->createPayment($request);
@@ -49,7 +49,7 @@ class PaymentControllerTest extends AbstractControllerTestCase
         $this->assertEquals(200, $response->getStatusCode());
 
         $responseData = json_decode($response->getContent(), true);
-        $this->assertEquals('requires_payment_method', $responseData['clientSecret']);
+        $this->assertEquals('secret_123', $responseData['clientSecret']);
         $this->assertEquals('pi_123', $responseData['paymentId']);
     }
 

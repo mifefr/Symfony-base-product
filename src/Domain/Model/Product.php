@@ -2,35 +2,33 @@
 
 namespace App\Domain\Model;
 
-use Symfony\Component\Uid\Uuid;
+use App\Domain\ValueObject\Money;
+use App\Domain\ValueObject\ProductId;
 
 class Product
 {
-    private Uuid $id;
+    private ProductId $id;
     private string $name;
-    private int $priceInCents;
+    private Money $price;
     private ?string $description;
 
     public function __construct(
-        Uuid $id,
+        ProductId $id,
         string $name,
-        int $priceInCents,
+        Money $price,
         ?string $description = null
     ) {
         if (trim($name) === '') {
             throw new \InvalidArgumentException('Product name cannot be empty');
         }
-        if ($priceInCents < 0) {
-            throw new \InvalidArgumentException('Product price cannot be negative');
-        }
 
         $this->id = $id;
         $this->name = $name;
-        $this->priceInCents = $priceInCents;
+        $this->price = $price;
         $this->description = $description;
     }
 
-    public function getId(): Uuid
+    public function getId(): ProductId
     {
         return $this->id;
     }
@@ -40,9 +38,9 @@ class Product
         return $this->name;
     }
 
-    public function getPriceInCents(): int
+    public function getPrice(): Money
     {
-        return $this->priceInCents;
+        return $this->price;
     }
 
     public function getDescription(): ?string

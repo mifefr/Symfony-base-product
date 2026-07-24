@@ -7,6 +7,7 @@ use App\Application\Command\CreateProduct\CreateProductCommand;
 use App\Application\Command\CreateProduct\CreateProductCommandHandler;
 use App\Domain\Model\Product;
 use App\Domain\Repository\ProductRepositoryInterface;
+use App\Domain\ValueObject\Money;
 
 class CreateProductHandlerTest extends TestCase
 {
@@ -21,15 +22,16 @@ class CreateProductHandlerTest extends TestCase
 
     public function testHandle(): void
     {
-        $command = new CreateProductCommand('Test Product', 100000, 'Test Description');
+        $command = new CreateProductCommand('Test Product', new Money(100000), 'Test Description');
 
         $this->productRepository
             ->expects($this->once())
             ->method('save')
-            ->with($this->callback(function ($product) {
+            ->with($this->callback(function ($product) use ($command) {
                 return $product instanceof Product
+                    && $product->getId()->equals($command->id)
                     && $product->getName() === 'Test Product'
-                    && $product->getPriceInCents() === 100000
+                    && $product->getPrice()->getAmountInCents() === 100000
                     && $product->getDescription() === 'Test Description';
             }));
 

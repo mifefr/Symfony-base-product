@@ -4,24 +4,23 @@ declare(strict_types=1);
 
 namespace App\Domain\Model;
 
+use App\Domain\ValueObject\Money;
+
 class Payment
 {
     private string $id;
-    private int $amountInCents;
-    private string $currency;
+    private Money $amount;
     private string $status;
     private ?string $clientSecret;
 
     public function __construct(
         string $id,
-        int $amountInCents,
-        string $currency,
+        Money $amount,
         string $status,
         ?string $clientSecret = null
     ) {
         $this->id = $id;
-        $this->amountInCents = $amountInCents;
-        $this->currency = $currency;
+        $this->amount = $amount;
         $this->status = $status;
         $this->clientSecret = $clientSecret;
     }
@@ -31,14 +30,9 @@ class Payment
         return $this->id;
     }
 
-    public function getAmountInCents(): int
+    public function getAmount(): Money
     {
-        return $this->amountInCents;
-    }
-
-    public function getCurrency(): string
-    {
-        return $this->currency;
+        return $this->amount;
     }
 
     public function getStatus(): string

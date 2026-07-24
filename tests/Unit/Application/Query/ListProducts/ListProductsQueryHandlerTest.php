@@ -5,7 +5,8 @@ namespace App\Tests\Unit\Application\Query\ListProducts;
 use App\Application\Query\ListProducts\ListProductsQueryHandler;
 use App\Application\Query\ListProducts\ListProductsQuery;
 use App\Domain\Model\Product;
-use Symfony\Component\Uid\Uuid;
+use App\Domain\ValueObject\Money;
+use App\Domain\ValueObject\ProductId;
 use App\Domain\Repository\ProductRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -23,8 +24,8 @@ class ListProductsQueryHandlerTest extends TestCase
     public function testListProducts(): void
     {
         $products = [
-            new Product(Uuid::v4(), 'Product 1', 1000),
-            new Product(Uuid::v4(), 'Product 2', 2000),
+            new Product(ProductId::generate(), 'Product 1', new Money(1000)),
+            new Product(ProductId::generate(), 'Product 2', new Money(2000)),
         ];
 
         $this->productRepository
