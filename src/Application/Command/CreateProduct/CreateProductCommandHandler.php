@@ -19,6 +19,7 @@ class CreateProductCommandHandler
     public function __invoke(CreateProductCommand $command): void
     {
         $product = new Product(
+            $command->id,
             $command->name,
             $command->priceInCents,
             $command->description

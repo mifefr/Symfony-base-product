@@ -46,7 +46,10 @@ class ProductController extends AbstractController
 
         $this->commandBus->dispatch($command);
 
-        return new JsonResponse(['status' => 'Product created'], Response::HTTP_CREATED);
+        return new JsonResponse([
+            'id' => (string) $command->id,
+            'status' => 'Product created',
+        ], Response::HTTP_CREATED);
     }
 
     #[Route('/api/products/{id}', name: 'get_product', methods: ['GET'])]

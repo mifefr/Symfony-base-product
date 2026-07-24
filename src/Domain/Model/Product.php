@@ -12,11 +12,12 @@ class Product
     private ?string $description;
 
     public function __construct(
+        Uuid $id,
         string $name,
         int $priceInCents,
         ?string $description = null
     ) {
-        $this->id = Uuid::v4();
+        $this->id = $id;
         $this->name = $name;
         $this->priceInCents = $priceInCents;
         $this->description = $description;

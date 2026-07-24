@@ -24,7 +24,7 @@ class DoctrineProductRepositoryTest extends TestCase
 
     public function testSave(): void
     {
-        $product = new Product('Test Product', 1000);
+        $product = new Product(Uuid::v4(), 'Test Product', 1000);
 
         $this->entityManager
             ->expects($this->once())
@@ -41,7 +41,7 @@ class DoctrineProductRepositoryTest extends TestCase
     public function testFindById(): void
     {
         $productId = Uuid::v4();
-        $expectedProduct = new Product('Test Product', 1000);
+        $expectedProduct = new Product(Uuid::v4(), 'Test Product', 1000);
 
         $this->repository
             ->expects($this->once())
@@ -62,8 +62,8 @@ class DoctrineProductRepositoryTest extends TestCase
     public function testFindAll(): void
     {
         $expectedProducts = [
-            new Product('Product 1', 1000),
-            new Product('Product 2', 2000),
+            new Product(Uuid::v4(), 'Product 1', 1000),
+            new Product(Uuid::v4(), 'Product 2', 2000),
         ];
 
         $this->repository
@@ -83,7 +83,7 @@ class DoctrineProductRepositoryTest extends TestCase
 
     public function testDelete(): void
     {
-        $product = new Product('Test Product', 1000);
+        $product = new Product(Uuid::v4(), 'Test Product', 1000);
 
         $this->entityManager
             ->expects($this->once())

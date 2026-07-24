@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Functional;
 
 use App\Domain\Model\Product;
+use Symfony\Component\Uid\Uuid;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -36,11 +37,13 @@ class ProductApiTest extends WebTestCase
         ]));
 
         self::assertResponseStatusCodeSame(201);
+        $responseData = json_decode($this->client->getResponse()->getContent(), true);
 
         $products = $this->entityManager->getRepository(Product::class)->findAll();
         self::assertCount(1, $products);
         self::assertSame('Functional Test Product', $products[0]->getName());
         self::assertSame(1999, $products[0]->getPriceInCents());
+        self::assertSame((string) $products[0]->getId(), $responseData['id']);
     }
 
     public function testCreateProductWithoutNameReturns400(): void
@@ -54,8 +57,8 @@ class ProductApiTest extends WebTestCase
 
     public function testListProducts(): void
     {
-        $this->persistProduct(new Product('Product A', 1000, 'First'));
-        $this->persistProduct(new Product('Product B', 2050, 'Second'));
+        $this->persistProduct(new Product(Uuid::v4(), 'Product A', 1000, 'First'));
+        $this->persistProduct(new Product(Uuid::v4(), 'Product B', 2050, 'Second'));
 
         $this->client->request('GET', '/api/products');
 
@@ -67,7 +70,7 @@ class ProductApiTest extends WebTestCase
 
     public function testGetProduct(): void
     {
-        $product = new Product('Single Product', 4250, 'Details');
+        $product = new Product(Uuid::v4(), 'Single Product', 4250, 'Details');
         $this->persistProduct($product);
 
         $this->client->request('GET', '/api/products/' . $product->getId());

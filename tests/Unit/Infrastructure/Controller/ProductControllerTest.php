@@ -54,13 +54,15 @@ class ProductControllerTest extends AbstractControllerTest
 
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals(201, $response->getStatusCode());
-        $this->assertEquals(['status' => 'Product created'], json_decode($response->getContent(), true));
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertEquals('Product created', $responseData['status']);
+        $this->assertTrue(Uuid::isValid($responseData['id']));
     }
 
     public function testGet(): void
     {
         $productId = Uuid::v4();
-        $product = new Product('Test Product', 100.0);
+        $product = new Product(Uuid::v4(), 'Test Product', 10000);
 
         $envelope = new Envelope(new \stdClass(), [
             new HandledStamp($product, 'handler')
@@ -83,8 +85,8 @@ class ProductControllerTest extends AbstractControllerTest
     public function testListProducts(): void
     {
         $products = [
-            new Product('Product 1', 100.0),
-            new Product('Product 2', 200.0)
+            new Product(Uuid::v4(), 'Product 1', 10000),
+            new Product(Uuid::v4(), 'Product 2', 20000)
         ];
 
         $envelope = new Envelope(new \stdClass(), [

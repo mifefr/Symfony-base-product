@@ -23,7 +23,7 @@ class GetProductHandlerTest extends TestCase
     public function testGetExistingProduct(): void
     {
         $productId = Uuid::v4();
-        $expectedProduct = new Product('Test Product', 1000);
+        $expectedProduct = new Product(Uuid::v4(), 'Test Product', 1000);
 
         $this->productRepository
             ->expects($this->once())
