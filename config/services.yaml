@@ -10,6 +10,7 @@ services:
             - '../src/Domain/Model/'
             - '../src/Domain/ValueObject/'
             - '../src/Infrastructure/Doctrine/Type/'
+            - '../src/Infrastructure/Request/'
             - '../src/Kernel.php'
 
     App\Infrastructure\Adapter\StripeAdapter:

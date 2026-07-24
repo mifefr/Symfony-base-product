@@ -31,7 +31,7 @@ class ProductApiTest extends WebTestCase
 
     public function testCreateProduct(): void
     {
-        $this->client->request('POST', '/api/products', content: json_encode([
+        $this->client->request('POST', '/api/products', server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
             'name' => 'Functional Test Product',
             'price' => 19.99,
             'description' => 'Created by functional test',
@@ -47,34 +47,34 @@ class ProductApiTest extends WebTestCase
         self::assertSame((string) $products[0]->getId(), $responseData['id']);
     }
 
-    public function testCreateProductWithoutNameReturns400(): void
+    public function testCreateProductWithoutNameReturns422(): void
     {
-        $this->client->request('POST', '/api/products', content: json_encode([
+        $this->client->request('POST', '/api/products', server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
             'price' => 19.99,
         ]));
 
-        self::assertResponseStatusCodeSame(400);
+        self::assertResponseStatusCodeSame(422);
     }
 
-    public function testCreateProductWithEmptyNameReturns400(): void
+    public function testCreateProductWithEmptyNameReturns422(): void
     {
-        $this->client->request('POST', '/api/products', content: json_encode([
+        $this->client->request('POST', '/api/products', server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
             'name' => '',
             'price' => 19.99,
         ]));
 
-        self::assertResponseStatusCodeSame(400);
+        self::assertResponseStatusCodeSame(422);
         self::assertSame(0, count($this->entityManager->getRepository(Product::class)->findAll()));
     }
 
-    public function testCreateProductWithNegativePriceReturns400(): void
+    public function testCreateProductWithNegativePriceReturns422(): void
     {
-        $this->client->request('POST', '/api/products', content: json_encode([
+        $this->client->request('POST', '/api/products', server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
             'name' => 'Bad Product',
             'price' => -5.0,
         ]));
 
-        self::assertResponseStatusCodeSame(400);
+        self::assertResponseStatusCodeSame(422);
         self::assertSame(0, count($this->entityManager->getRepository(Product::class)->findAll()));
     }
 
@@ -120,6 +120,18 @@ class ProductApiTest extends WebTestCase
         $this->client->request('GET', '/api/products/not-a-uuid');
 
         self::assertResponseStatusCodeSame(400);
+    }
+
+    public function testCreateProductWithWhitespaceNameHitsDomainValidation(): void
+    {
+        // passes the NotBlank surface check but is rejected by the domain
+        $this->client->request('POST', '/api/products', server: ['CONTENT_TYPE' => 'application/json'], content: json_encode([
+            'name' => '   ',
+            'price' => 19.99,
+        ]));
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertSame(0, count($this->entityManager->getRepository(Product::class)->findAll()));
     }
 
     private function persistProduct(Product $product): void

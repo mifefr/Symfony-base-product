@@ -6,9 +6,10 @@ namespace App\Infrastructure\Controller;
 
 use App\Domain\Port\PaymentServiceInterface;
 use App\Domain\ValueObject\Money;
+use App\Infrastructure\Request\CreatePaymentRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,17 +20,11 @@ class PaymentController extends AbstractController
     ) {}
 
     #[Route('/api/payment/create', name: 'create_payment', methods: ['POST'])]
-    public function createPayment(Request $request): JsonResponse
+    public function createPayment(#[MapRequestPayload] CreatePaymentRequest $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        if (!isset($data['amount'])) {
-            return new JsonResponse(['error' => 'Amount is required'], Response::HTTP_BAD_REQUEST);
-        }
-
         try {
             $payment = $this->paymentService->createPaymentIntent(
-                Money::fromDecimal((float) $data['amount'])
+                Money::fromDecimal($request->amount)
             );
 
             return $this->json([

@@ -12,10 +12,11 @@ use App\Application\Query\ListProducts\ListProductsQuery;
 use App\Domain\Model\Product;
 use App\Domain\ValueObject\Money;
 use App\Domain\ValueObject\ProductId;
+use App\Infrastructure\Request\CreateProductRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends AbstractController
@@ -27,23 +28,13 @@ class ProductController extends AbstractController
     }
 
     #[Route('/api/products', name: 'create_product', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
+    public function create(#[MapRequestPayload] CreateProductRequest $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        if (!isset($data['name'])) {
-            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
-        }
-
-        if (!isset($data['price'])) {
-            return new JsonResponse(['error' => 'Price is required'], Response::HTTP_BAD_REQUEST);
-        }
-
         try {
             $command = new CreateProductCommand(
-                name: $data['name'],
-                price: Money::fromDecimal((float) $data['price']),
-                description: $data['description'] ?? ''
+                name: $request->name,
+                price: Money::fromDecimal($request->price),
+                description: $request->description ?? ''
             );
 
             $this->commandBus->dispatch($command);

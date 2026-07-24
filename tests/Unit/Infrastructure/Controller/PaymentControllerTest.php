@@ -6,9 +6,9 @@ use App\Domain\Model\Payment;
 use App\Domain\ValueObject\Money;
 use App\Domain\Port\PaymentServiceInterface;
 use App\Infrastructure\Controller\PaymentController;
+use App\Infrastructure\Request\CreatePaymentRequest;
 use App\Tests\Unit\Infrastructure\Controller\AbstractControllerTestCase;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 
 class PaymentControllerTest extends AbstractControllerTestCase
 {
@@ -25,10 +25,8 @@ class PaymentControllerTest extends AbstractControllerTestCase
 
     public function testCreatePayment(): void
     {
-        $amount = 1000.0;
-        $request = new Request([], [], [], [], [], [], json_encode([
-            'amount' => $amount
-        ]));
+        $request = new CreatePaymentRequest();
+        $request->amount = 1000.0;
 
         $payment = new Payment(
             'pi_123',
@@ -55,20 +53,8 @@ class PaymentControllerTest extends AbstractControllerTestCase
 
     public function testCreatePaymentWithInvalidAmount(): void
     {
-        $request = new Request([], [], [], [], [], [], json_encode([
-            'amount' => -100.0
-        ]));
-
-        $response = $this->controller->createPayment($request);
-
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertArrayHasKey('error', json_decode($response->getContent(), true));
-    }
-
-    public function testCreatePaymentWithMissingAmount(): void
-    {
-        $request = new Request([], [], [], [], [], [], json_encode([]));
+        $request = new CreatePaymentRequest();
+        $request->amount = -100.0;
 
         $response = $this->controller->createPayment($request);
 
@@ -79,9 +65,8 @@ class PaymentControllerTest extends AbstractControllerTestCase
 
     public function testCreatePaymentWithProviderFailureReturnsGenericError(): void
     {
-        $request = new Request([], [], [], [], [], [], json_encode([
-            'amount' => 100.0
-        ]));
+        $request = new CreatePaymentRequest();
+        $request->amount = 100.0;
 
         $this->paymentService
             ->expects($this->once())

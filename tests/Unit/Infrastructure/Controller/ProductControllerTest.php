@@ -11,8 +11,8 @@ use App\Domain\Model\Product;
 use App\Domain\ValueObject\Money;
 use App\Domain\ValueObject\ProductId;
 use App\Infrastructure\Controller\ProductController;
+use App\Infrastructure\Request\CreateProductRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Uid\Uuid;
 
 class ProductControllerTest extends AbstractControllerTestCase
@@ -32,21 +32,18 @@ class ProductControllerTest extends AbstractControllerTestCase
 
     public function testCreate(): void
     {
-        $requestData = [
-            'name' => 'Test Product',
-            'price' => 100.0,
-            'description' => 'Test Description'
-        ];
-
-        $request = new Request([], [], [], [], [], [], json_encode($requestData));
+        $request = new CreateProductRequest();
+        $request->name = 'Test Product';
+        $request->price = 100.0;
+        $request->description = 'Test Description';
 
         $this->commandBus
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->callback(function (CreateProductCommand $command) use ($requestData) {
-                return $command->name === $requestData['name']
+            ->with($this->callback(function (CreateProductCommand $command) {
+                return $command->name === 'Test Product'
                     && $command->price->getAmountInCents() === 10000
-                    && $command->description === $requestData['description'];
+                    && $command->description === 'Test Description';
             }));
 
         $response = $this->controller->create($request);
@@ -58,23 +55,11 @@ class ProductControllerTest extends AbstractControllerTestCase
         $this->assertTrue(Uuid::isValid($responseData['id']));
     }
 
-    public function testCreateWithMissingNameReturns400(): void
-    {
-        $request = new Request([], [], [], [], [], [], json_encode(['price' => 10.0]));
-
-        $this->commandBus->expects($this->never())->method('dispatch');
-
-        $response = $this->controller->create($request);
-
-        $this->assertEquals(400, $response->getStatusCode());
-    }
-
     public function testCreateWithDomainValidationErrorReturns400(): void
     {
-        $request = new Request([], [], [], [], [], [], json_encode([
-            'name' => '   ',
-            'price' => 10.0,
-        ]));
+        $request = new CreateProductRequest();
+        $request->name = '   ';
+        $request->price = 10.0;
 
         $this->commandBus
             ->expects($this->once())
