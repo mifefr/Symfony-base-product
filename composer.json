@@ -7,7 +7,6 @@
     "prefer-stable": true,
     "require": {
         "php": ">=8.2",
-        "api-platform/api-pack": "^1.4",
         "doctrine/doctrine-bundle": "^2.11",
         "doctrine/orm": "^2.17",
         "stripe/stripe-php": "^16.5",
