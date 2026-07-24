@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace App\Application\Query\GetProduct;
 
-use App\Application\Query\QueryHandlerInterface;
-use App\Application\Query\QueryInterface;
+use App\Domain\Model\Product;
 use App\Domain\Repository\ProductRepositoryInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-final class GetProductHandler implements QueryHandlerInterface
+#[AsMessageHandler]
+final class GetProductHandler
 {
     public function __construct(
         private readonly ProductRepositoryInterface $productRepository
     ) {
     }
 
-    public function __invoke(QueryInterface $query): mixed
+    public function __invoke(GetProductQuery $query): ?Product
     {
-        if (!$query instanceof GetProductQuery) {
-            throw new \InvalidArgumentException('Invalid query type');
-        }
-
         return $this->productRepository->findById($query->id);
     }
 }

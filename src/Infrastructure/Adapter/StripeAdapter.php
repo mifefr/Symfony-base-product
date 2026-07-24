@@ -26,7 +26,7 @@ class StripeAdapter implements PaymentServiceInterface
 
         try {
             $paymentIntent = $this->stripe->paymentIntents->create([
-                'amount' => (int) ($amount * 100), // Stripe expects amounts in cents
+                'amount' => (int) round($amount * 100), // Stripe expects amounts in cents
                 'currency' => $currency,
                 'automatic_payment_methods' => [
                     'enabled' => true,

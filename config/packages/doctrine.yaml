@@ -1,7 +1,6 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
-        driver: pdo_mysql
 
     orm:
         auto_generate_proxy_classes: true
